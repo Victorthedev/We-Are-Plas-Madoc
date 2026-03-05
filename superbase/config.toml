@@ -1,0 +1,10 @@
+project_id = "taraxykfzpevawrpalus"
+
+[functions.handle-rsvp]
+verify_jwt = false
+
+[functions.send-event-reminders]
+verify_jwt = false
+
+[functions.notify-event-cancellation]
+verify_jwt = false

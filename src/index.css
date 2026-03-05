@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 249 100% 98%;
+    --foreground: 240 29% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 29% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 29% 14%;
+    --primary: 283 39% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 283 36% 72%;
+    --secondary-foreground: 264 48% 21%;
+    --muted: 249 40% 95%;
+    --muted-foreground: 264 20% 45%;
+    --accent: 201 71% 63%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 327 82% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 283 20% 90%;
+    --input: 283 20% 88%;
+    --ring: 283 39% 53%;
+    --radius: 1rem;
+    --wapm-deep: 264 48% 21%;
+    --wapm-dark: 283 42% 36%;
+    --wapm-cyan: 201 71% 63%;
+    --wapm-pink: 327 82% 52%;
+    --wapm-lavender: 249 100% 98%;
+    --wapm-green: 145 50% 36%;
+    --shadow-card: 0 4px 20px rgba(142, 68, 173, 0.08);
+    --shadow-card-hover: 0 12px 40px rgba(142, 68, 173, 0.2);
+    --shadow-nav: 0 2px 20px rgba(0, 0, 0, 0.1);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  p {
+    line-height: 1.6;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary-foreground rounded-full px-8 py-3 font-semibold
+           transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] inline-block text-center;
+    box-shadow: 0 4px 15px hsl(var(--primary) / 0.3);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 6px 25px hsl(var(--primary) / 0.4);
+  }
+
+  .btn-outline-primary {
+    @apply border-2 border-primary text-primary rounded-full px-8 py-3 font-semibold bg-transparent
+           transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:scale-[1.03] active:scale-[0.97] inline-block text-center;
+  }
+
+  .btn-hero {
+    @apply rounded-full px-8 py-4 font-semibold text-base
+           transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] inline-block text-center;
+  }
+  .btn-hero-filled {
+    @apply btn-hero;
+    background: hsl(var(--card));
+    color: hsl(var(--wapm-deep));
+  }
+  .btn-hero-filled:hover {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+  .btn-hero-outline {
+    @apply btn-hero border-2;
+    border-color: hsl(var(--card));
+    color: hsl(var(--card));
+    background: transparent;
+  }
+  .btn-hero-outline:hover {
+    background: hsl(var(--card));
+    color: hsl(var(--wapm-deep));
+  }
+
+  .pill-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold;
+  }
+  .pill-badge-cyan {
+    @apply pill-badge bg-accent text-accent-foreground;
+  }
+  .pill-badge-purple {
+    @apply pill-badge bg-primary text-primary-foreground;
+  }
+
+  .section-padding {
+    @apply py-20 px-4 md:px-8 lg:px-16;
+  }
+
+  .card-wapm {
+    @apply bg-card rounded-2xl transition-all duration-300;
+    box-shadow: var(--shadow-card);
+  }
+  .card-wapm:hover {
+    @apply -translate-y-1.5;
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .nav-link-animated {
+    @apply relative;
+  }
+  .nav-link-animated::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-accent origin-bottom-right transition-transform duration-300 scale-x-0;
+  }
+  .nav-link-animated:hover::after {
+    @apply scale-x-100 origin-bottom-left;
+  }
+
+  .input-wapm {
+    @apply w-full px-4 py-3 rounded-xl border bg-card text-foreground transition-colors
+           focus:outline-none focus:ring-2 focus:ring-primary/30;
+  }
+  .input-wapm-error {
+    @apply border-destructive;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(-12px); }
+  50% { transform: translateY(12px); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
