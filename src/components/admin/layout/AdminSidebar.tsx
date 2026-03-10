@@ -47,8 +47,8 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
           className={cn(
             "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
             active
-              ? "bg-wapm-purple/25 text-white border-l-[3px] border-wapm-cyan"
-              : "text-[#E8E0F0]/65 hover:text-white hover:bg-white/[0.07]",
+            ? "bg-wapm-purple text-white border-l-[3px] border-wapm-cyan"
+            : "text-white/70 hover:text-white hover:bg-white/10",
             collapsed && "justify-center px-2"
           )}
           title={collapsed ? item.label : undefined}

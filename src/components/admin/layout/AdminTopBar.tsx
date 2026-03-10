@@ -11,7 +11,7 @@ export default function AdminTopBar({ title, breadcrumb, onMenuClick }: AdminTop
   const { profile } = useAuth();
 
   return (
-    <header className="h-16 bg-white border-b border-wapm-purple/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 sticky top-0 z-40">
+    <header className="h-16 bg-wapm-lavender border-b border-wapm-purple/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 sticky top-0 z-40">
       <div className="flex items-center gap-4">
         {onMenuClick && (
           <button onClick={onMenuClick} className="lg:hidden text-wapm-deep-purple">

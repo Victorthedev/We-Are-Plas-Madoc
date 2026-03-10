@@ -171,3 +171,32 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+[data-sidebar="sidebar"] {
+  background-color: hsl(264 48% 21%) !important; /* Deep Purple */
+  color: #ffffff !important;
+  border-color: hsl(283 42% 36%) !important;
+}
+
+[data-sidebar="sidebar"] * {
+  color: #ffffff !important;
+}
+
+[data-sidebar="sidebar"] input,
+[data-sidebar="sidebar"] select {
+  background-color: hsl(283 42% 36%) !important;
+  color: #ffffff !important;
+  border-color: hsl(283 42% 36%) !important;
+}
+
+body:has(.admin-shell), 
+main.admin-bg,
+div[class*="admin"] {
+  background-color: hsl(249 100% 96%) !important;
+}
+
+button[class*="white"], 
+.bg-white {
+  background-color: #ffffff !important;
+  color: hsl(264 48% 21%) !important;
+}
