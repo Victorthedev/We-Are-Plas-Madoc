@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 249 100% 98%;
+    --background: 249 100% 96%;
     --foreground: 240 29% 14%;
     --card: 0 0% 100%;
     --card-foreground: 240 29% 14%;
@@ -33,14 +33,14 @@
     --shadow-card: 0 4px 20px rgba(142, 68, 173, 0.08);
     --shadow-card-hover: 0 12px 40px rgba(142, 68, 173, 0.2);
     --shadow-nav: 0 2px 20px rgba(0, 0, 0, 0.1);
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 264 48% 21%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 283 39% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 283 42% 36%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 283 42% 36%;
+    --sidebar-ring: 283 39% 53%;
   }
 
   * {

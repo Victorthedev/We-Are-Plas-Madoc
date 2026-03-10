@@ -2,6 +2,7 @@ import { useState } from "react";
 import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/superbase/client";
 
 const vacancies = [
   { title: "Volunteer Driver", commitment: "Flexible Hours", involved: ["Driving electric automatic vehicles", "Full clean driving licence required", "Supporting residents to appointments, shopping, social events", "Door to door service"], requirements: ["Full clean UK driving licence", "Friendly and patient manner", "DBS check (we'll arrange this)"] },
@@ -30,10 +31,26 @@ export default function GetInvolved() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
+    
+    const { error } = await supabase.from("volunteers").insert({
+      first_name: form.firstName,
+      last_name: form.lastName,
+      email: form.email,
+      phone: form.phone,
+      position: form.position,
+      start_date: form.startDate || null,
+      cv_link: form.cvLink || null,
+      message: form.message,
+      status: "new",
+    });
+  
     setLoading(false);
-    setSubmitted(true);
-    toast.success("Application submitted successfully!");
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setSubmitted(true);
+      toast.success("Application submitted successfully!");
+    }
   };
 
   const update = (field: string, value: string) => {
