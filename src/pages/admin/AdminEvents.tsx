@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AdminShell from "@/components/admin/layout/AdminShell";
 import PermissionGuard from "@/components/admin/shared/PermissionGuard";
 import RsvpDrawer from "@/components/admin/events/RsvpDrawer";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "../../integrations/superbase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";

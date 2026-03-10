@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminShell from "@/components/admin/layout/AdminShell";
 import PermissionGuard from "@/components/admin/shared/PermissionGuard";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "../../integrations/superbase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Eye, Briefcase } from "lucide-react";

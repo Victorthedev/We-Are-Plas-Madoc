@@ -4,7 +4,7 @@ import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import RsvpButton from "@/components/events/RsvpButton";
 import EventShareButtons from "@/components/events/EventShareButtons";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "../integrations/superbase/client";
 import { ChevronLeft, ChevronRight, MapPin, Clock } from "lucide-react";
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

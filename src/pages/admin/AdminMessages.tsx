@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminShell from "@/components/admin/layout/AdminShell";
 import PermissionGuard from "@/components/admin/shared/PermissionGuard";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "../../integrations/superbase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mail, Trash2, CheckCheck } from "lucide-react";
