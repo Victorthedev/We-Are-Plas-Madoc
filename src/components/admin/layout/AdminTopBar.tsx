@@ -14,12 +14,12 @@ export default function AdminTopBar({ title, breadcrumb, onMenuClick }: AdminTop
     <header className="h-16 bg-wapm-lavender border-b border-wapm-purple/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 sticky top-0 z-40">
       <div className="flex items-center gap-4">
         {onMenuClick && (
-          <button onClick={onMenuClick} className="lg:hidden text-wapm-deep-purple">
+          <button onClick={onMenuClick} className="lg:hidden text-wapm-deep">
             <Menu className="w-5 h-5" />
           </button>
         )}
         <div>
-          <h1 className="text-xl font-semibold text-wapm-deep-purple">{title}</h1>
+          <h1 className="text-xl font-semibold text-wapm-deep">{title}</h1>
           {breadcrumb && <p className="text-xs text-muted-foreground">{breadcrumb}</p>}
         </div>
       </div>

@@ -29,7 +29,7 @@ export default function AdminShell({ children, title, breadcrumb }: AdminShellPr
     return (
       <div className="min-h-screen bg-wapm-lavender flex items-center justify-center">
         <div className="text-center max-w-md p-8">
-          <h2 className="text-2xl font-bold text-wapm-deep-purple mb-2">No Access</h2>
+          <h2 className="text-2xl font-bold text-wapm-deep mb-2">No Access</h2>
           <p className="text-muted-foreground">You don't have permission to access this area. Please contact your administrator.</p>
         </div>
       </div>

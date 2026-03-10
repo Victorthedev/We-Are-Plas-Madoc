@@ -24,7 +24,7 @@ const bottomItems = [
 ];
 
 const roleBadge: Record<string, { label: string; className: string }> = {
-  super_admin: { label: "Super Admin", className: "bg-wapm-deep-purple text-white" },
+  super_admin: { label: "Super Admin", className: "bg-wapm-deep text-white" },
   editor: { label: "Editor", className: "bg-wapm-purple text-white" },
   contributor: { label: "Contributor", className: "bg-wapm-cyan text-white" },
   gallery_only: { label: "Gallery", className: "bg-wapm-pink text-white" },
@@ -63,7 +63,7 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-screen bg-wapm-deep-purple flex flex-col z-50 transition-all duration-300 shadow-[4px_0_20px_rgba(0,0,0,0.15)]",
+        "fixed left-0 top-0 h-screen bg-wapm-deep flex flex-col z-50 transition-all duration-300 shadow-[4px_0_20px_rgba(0,0,0,0.15)]",
         collapsed ? "w-[72px]" : "w-[260px]"
       )}
     >
