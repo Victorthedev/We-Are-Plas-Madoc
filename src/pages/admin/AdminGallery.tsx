@@ -6,14 +6,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Trash2, Pencil, Image } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const categories = ["events", "land", "community", "sunflowers", "food-van", "general"];
+const categories = ["events", "the-land", "homegrown", "community-pantry", "community", "general"];
 
 export default function AdminGallery() {
   const { user, profile } = useAuth();
@@ -135,7 +135,10 @@ export default function AdminGallery() {
           <DialogContent className="rounded-2xl">
             <DialogHeader><DialogTitle>Upload Photo</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              <div><Label>Image URL *</Label><Input value={uploadUrl} onChange={e => setUploadUrl(e.target.value)} placeholder="https://..." className="rounded-[10px] mt-1" /></div>
+              <div>
+                <Label className="mb-1 block">Photo *</Label>
+                <ImageUpload value={uploadUrl} onChange={setUploadUrl} folder="gallery" />
+              </div>
               <div><Label>Caption</Label><Input value={uploadCaption} onChange={e => setUploadCaption(e.target.value)} className="rounded-[10px] mt-1" /></div>
               <div>
                 <Label>Category</Label>

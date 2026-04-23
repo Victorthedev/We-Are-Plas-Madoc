@@ -27,7 +27,7 @@ export default function HeroSection() {
             className="text-lg text-primary-foreground/85 font-light max-w-[480px] mb-8 mx-auto lg:mx-0 opacity-0"
             style={{ animation: "fade-in-up 0.6s 0.6s forwards" }}
           >
-            We Are Plas Madoc (WAPM) is a community-led charity supporting residents of Plas Madoc with transport, childcare, food, and outdoor adventure. Run by volunteers, for the community.
+            We Are Plas Madoc (WAPM) is a community-led organisation improving opportunities and quality of life for residents in Plas Madoc. Shaped by local people, their ideas, skills and lived experience.
           </p>
           <div
             className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start opacity-0"

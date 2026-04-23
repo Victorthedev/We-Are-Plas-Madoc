@@ -10,10 +10,10 @@ export default function AboutStrip() {
             <span className="pill-badge-cyan mb-4 inline-flex">About WAPM</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">A Community Built For, And By, Its Residents</h2>
             <p className="text-muted-foreground mb-4 leading-relaxed">
-              We Are Plas Madoc is a registered CIO charity born out of a simple belief — that communities are stronger when they look after each other. Based in the Plas Madoc estate in Wrexham, we've been making a difference since day one.
+              We Are Plas Madoc is a community-led organisation dedicated to improving opportunities and quality of life for residents in Plas Madoc. Our work is shaped by local people, their ideas, skills and lived experience.
             </p>
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              From giving elderly residents their independence through our community car scheme, to giving children the freedom to explore at The Land, everything we do is rooted in the needs of local people.
+              Our staff and volunteers include many local residents who bring deep knowledge and a genuine understanding of what matters here. Whether it's transport, food, play or simply a place to connect — everything we do is rooted in the needs of the community.
             </p>
             <Link to="/team" className="btn-primary">Our Story →</Link>
           </AnimatedSection>

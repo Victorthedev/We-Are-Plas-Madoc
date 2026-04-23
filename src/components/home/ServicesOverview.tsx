@@ -1,16 +1,31 @@
+import { useEffect, useState } from "react";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import DotPattern from "@/components/ui/DotPattern";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/superbase/client";
 
-const services = [
-  { icon: "🚗", title: "Community Car Scheme", desc: "Door-to-door transport for hospital appointments, shopping trips, social events and visiting family.", slug: "community-car" },
-  { icon: "🌿", title: "The Land Adventure Playground", desc: "A wild, creative outdoor space where children can explore, build, and connect with nature freely.", slug: "the-land" },
-  { icon: "☕", title: "Kettle & Breakfast Club", desc: "A warm and welcoming space to start the day — combating isolation and bringing neighbours together.", slug: "kettle-club" },
-  { icon: "🌻", title: "Little Sunflowers Childcare", desc: "Quality, affordable childcare in the heart of the community — giving parents peace of mind.", slug: "little-sunflowers" },
-  { icon: "🍱", title: "Mobile Food Van", desc: "Bringing affordable, nutritious food directly to residents across Plas Madoc every week.", slug: "food-van" },
-];
+type Service = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  display_order: number | null;
+};
 
 export default function ServicesOverview() {
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("services")
+      .select("id, name, slug, description, icon, display_order")
+      .order("display_order")
+      .then(({ data }) => setServices(data || []));
+  }, []);
+
+  if (services.length === 0) return null;
+
   return (
     <section className="relative section-padding bg-wapm-lavender">
       <DotPattern opacity={0.05} />
@@ -22,11 +37,11 @@ export default function ServicesOverview() {
         </AnimatedSection>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((s, i) => (
-            <AnimatedSection key={s.slug} delay={i * 0.1}>
+            <AnimatedSection key={s.id} delay={i * 0.1}>
               <div className="card-wapm p-8 h-full border-t-[3px] border-transparent hover:border-primary group">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl mb-5">{s.icon}</div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">{s.title}</h3>
-                <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{s.desc}</p>
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl mb-5">{s.icon || "📋"}</div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">{s.name}</h3>
+                <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{s.description}</p>
                 <Link to={`/services/${s.slug}`} className="text-primary font-semibold text-sm hover:text-accent transition-colors">Learn More →</Link>
               </div>
             </AnimatedSection>

@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, Newspaper, CalendarDays, Image, Users, MessageSquare,
-  Briefcase, UserCog, Settings, LogOut, ChevronLeft, ChevronRight, Handshake
+  Briefcase, UserCog, Settings, LogOut, ChevronLeft, ChevronRight, Handshake, ClipboardList
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const navItems = [
   { icon: CalendarDays, label: "Events", path: "/admin/events", roles: ["super_admin", "editor", "contributor"] },
   { icon: Image, label: "Gallery", path: "/admin/gallery", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
   { icon: Handshake, label: "Volunteers", path: "/admin/volunteers", roles: ["super_admin", "editor"] },
+  { icon: ClipboardList, label: "Vol. Positions", path: "/admin/volunteer-positions", roles: ["super_admin", "editor"] },
   { icon: MessageSquare, label: "Messages", path: "/admin/messages", roles: ["super_admin", "editor"] },
   { icon: Briefcase, label: "Services", path: "/admin/services", roles: ["super_admin", "editor"] },
   { icon: Users, label: "Team", path: "/admin/team", roles: ["super_admin", "editor"] },
@@ -73,7 +74,11 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
           <div className="w-8 h-8 rounded-full bg-wapm-purple flex items-center justify-center text-white font-bold text-sm">W</div>
           {!collapsed && <span className="text-white font-semibold text-sm">WAPM Admin</span>}
         </Link>
-        <button onClick={onToggle} className="text-white/50 hover:text-white transition-colors">
+        <button
+          onClick={onToggle}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+        >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
@@ -105,11 +110,11 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
         <button
           onClick={signOut}
           className={cn(
-            "flex items-center gap-2 mt-3 text-[#E8E0F0]/50 hover:text-white transition-colors text-sm w-full",
-            collapsed && "justify-center"
+            "flex items-center gap-2 mt-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-red-500/20 transition-all",
+            collapsed && "justify-center px-2"
           )}
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-4 h-4 shrink-0" />
           {!collapsed && <span>Log out</span>}
         </button>
       </div>

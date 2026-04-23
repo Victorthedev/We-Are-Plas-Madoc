@@ -2,17 +2,22 @@ import { useEffect, useState } from "react";
 import AdminShell from "@/components/admin/layout/AdminShell";
 import PermissionGuard from "@/components/admin/shared/PermissionGuard";
 import { supabase } from "../../integrations/superbase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mail, Trash2, CheckCheck } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Mail, Trash2, CheckCheck, Send } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function AdminMessages() {
+  const { profile } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
+  const [replyText, setReplyText] = useState("");
+  const [replying, setReplying] = useState(false);
 
   const fetch = async () => {
     setLoading(true);
@@ -43,6 +48,27 @@ export default function AdminMessages() {
     toast.success("Deleted");
     if (selected?.id === id) setSelected(null);
     fetch();
+  };
+
+  const sendReply = async () => {
+    if (!selected || !replyText.trim()) return;
+    setReplying(true);
+    const { error } = await supabase.functions.invoke("send-reply", {
+      body: {
+        to_email: selected.email,
+        to_name: selected.name,
+        original_subject: selected.subject,
+        reply_body: replyText.trim(),
+        staff_name: profile?.full_name || "The WAPM Team",
+      },
+    });
+    setReplying(false);
+    if (error) {
+      toast.error("Failed to send reply. Please try again.");
+    } else {
+      toast.success(`Reply sent to ${selected.name}`);
+      setReplyText("");
+    }
   };
 
   const formatTime = (d: string) => {
@@ -84,7 +110,7 @@ export default function AdminMessages() {
                 </div>
               ) : (
                 filtered.map(m => (
-                  <button key={m.id} onClick={() => { setSelected(m); if (!m.read) markRead(m.id, true); }}
+                  <button key={m.id} onClick={() => { setSelected(m); setReplyText(""); if (!m.read) markRead(m.id, true); }}
                     className={cn("w-full text-left p-4 hover:bg-wapm-lavender/50 transition-colors",
                       !m.read && "bg-wapm-purple/[0.03] border-l-2 border-l-wapm-purple",
                       selected?.id === m.id && "bg-wapm-lavender"
@@ -125,18 +151,34 @@ export default function AdminMessages() {
                     <Button variant="ghost" size="icon" onClick={() => markRead(selected.id, !selected.read)} className="h-8 w-8">
                       <CheckCheck className={cn("w-4 h-4", selected.read ? "text-green-600" : "text-muted-foreground")} />
                     </Button>
-                    <Button variant="ghost" size="icon" asChild className="h-8 w-8 text-wapm-purple">
-                      <a href={`mailto:${selected.email}?subject=Re: ${selected.subject || ""}`}>
-                        <Mail className="w-4 h-4" />
-                      </a>
-                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleDelete(selected.id)} className="h-8 w-8 text-red-500">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
                 <div className="border-t border-wapm-purple/[0.08] pt-4">
-                  <div className="bg-white rounded-xl p-6 text-sm leading-relaxed whitespace-pre-wrap">{selected.message}</div>
+                  <div className="bg-wapm-lavender rounded-xl p-6 text-sm leading-relaxed whitespace-pre-wrap text-foreground">{selected.message}</div>
+                </div>
+
+                {/* Reply form */}
+                <div className="border-t border-wapm-purple/[0.08] pt-4 mt-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Reply to {selected.name}</p>
+                  <Textarea
+                    value={replyText}
+                    onChange={e => setReplyText(e.target.value)}
+                    placeholder={`Write your reply to ${selected.email}...`}
+                    className="rounded-xl text-sm min-h-[120px] resize-none"
+                  />
+                  <div className="flex justify-end mt-2">
+                    <Button
+                      onClick={sendReply}
+                      disabled={replying || !replyText.trim()}
+                      className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white text-sm"
+                    >
+                      <Send className="w-3.5 h-3.5 mr-1.5" />
+                      {replying ? "Sending..." : "Send Reply"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

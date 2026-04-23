@@ -3,11 +3,12 @@ import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { toast } from "sonner";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { supabase } from "@/integrations/superbase/client";
 
 const faqs = [
   { q: "How do I book a community transport journey?", a: "Call us on 01978 813912 or 07423503836 to book. We'll arrange a volunteer driver for your date and time." },
-  { q: "Is the Kettle Club free to attend?", a: "Yes! The Kettle Club is completely free and open to all Plas Madoc residents. Just turn up!" },
-  { q: "How do I enrol my child at Little Sunflowers?", a: "Get in touch with us via phone or email and we'll walk you through the enrolment process." },
+  { q: "Is the Kettle Club free to attend?", a: "Yes! The Kettle Club is completely free and open to all Plas Madoc residents. Just turn up — no booking needed." },
+  { q: "Does the Community Pantry require a referral?", a: "No referral is needed. The Community Pantry is open to all residents in Plas Madoc and the surrounding areas. Everyone is welcome." },
   { q: "Can I volunteer even if I have limited time?", a: "Absolutely. We have flexible volunteering options to suit your availability." },
   { q: "How is WAPM funded?", a: "WAPM is a registered CIO charity funded through grants, donations, and community fundraising." },
 ];
@@ -32,10 +33,16 @@ export default function Contact() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1500));
+    const { error } = await supabase.functions.invoke("handle-contact", {
+      body: { name: form.name, email: form.email, phone: form.phone, subject: form.subject, message: form.message },
+    });
     setLoading(false);
-    setSent(true);
-    toast.success("Message sent successfully!");
+    if (error) {
+      toast.error("Failed to send message. Please try again or call us directly.");
+    } else {
+      setSent(true);
+      toast.success("Message sent successfully!");
+    }
   };
 
   const update = (field: string, value: string) => {

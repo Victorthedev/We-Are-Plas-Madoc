@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 
 export default function AdminTeam() {
@@ -144,7 +145,10 @@ export default function AdminTeam() {
               <div><Label>Full Name *</Label><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="rounded-[10px] mt-1" /></div>
               <div><Label>Role/Title *</Label><Input value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} className="rounded-[10px] mt-1" /></div>
               <div><Label>Bio</Label><Textarea value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} className="rounded-xl mt-1" rows={3} maxLength={200} /><p className="text-xs text-muted-foreground mt-1">{form.bio.length}/200</p></div>
-              <div><Label>Photo URL</Label><Input value={form.photo_url} onChange={e => setForm({ ...form, photo_url: e.target.value })} className="rounded-[10px] mt-1" /></div>
+              <div>
+                <Label className="mb-1 block">Photo</Label>
+                <ImageUpload value={form.photo_url} onChange={v => setForm({ ...form, photo_url: v })} folder="team" />
+              </div>
               <div><Label>Social/Email Link</Label><Input value={form.social_link} onChange={e => setForm({ ...form, social_link: e.target.value })} className="rounded-[10px] mt-1" /></div>
               <div className="flex items-center gap-2">
                 <Checkbox checked={form.is_trustee} onCheckedChange={v => setForm({ ...form, is_trustee: !!v })} />

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Save } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 
 export default function AdminServiceEditor() {
@@ -74,7 +75,10 @@ export default function AdminServiceEditor() {
               <div><Label>Service Name</Label><Input value={name} disabled className="rounded-[10px] mt-1 bg-muted" /></div>
               <div><Label>Short Description</Label><Textarea value={description} onChange={e => setDescription(e.target.value)} className="rounded-xl mt-1" rows={3} /></div>
               <div><Label>Full Content</Label><Textarea value={content} onChange={e => setContent(e.target.value)} className="rounded-xl mt-1 min-h-[300px]" /></div>
-              <div><Label>Featured Image URL</Label><Input value={imageUrl} onChange={e => setImageUrl(e.target.value)} className="rounded-[10px] mt-1" /></div>
+              <div>
+                <Label className="mb-1 block">Featured Image</Label>
+                <ImageUpload value={imageUrl} onChange={setImageUrl} folder="services" />
+              </div>
             </CardContent>
           </Card>
         </div>

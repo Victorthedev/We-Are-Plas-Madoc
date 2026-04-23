@@ -26,6 +26,7 @@ export default function AdminStaff() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
   const [inviteRole, setInviteRole] = useState("contributor");
+  const [inviting, setInviting] = useState(false);
 
   const fetch = async () => {
     setLoading(true);
@@ -131,10 +132,29 @@ export default function AdminStaff() {
                   ))}
                 </div>
               </div>
-              <Button onClick={() => {
-                toast.info("Staff invitation would be sent via backend. Create the user account and assign their role.");
-                setShowInvite(false);
-              }} className="w-full rounded-full bg-wapm-purple text-white">Send Invitation</Button>
+              <Button
+                disabled={inviting || !inviteEmail.trim() || !inviteName.trim()}
+                onClick={async () => {
+                  setInviting(true);
+                  const { error } = await supabase.functions.invoke("invite-staff", {
+                    body: { email: inviteEmail.trim(), full_name: inviteName.trim(), role: inviteRole },
+                  });
+                  setInviting(false);
+                  if (error) {
+                    toast.error(error.message || "Failed to send invitation");
+                  } else {
+                    toast.success(`Invitation sent to ${inviteEmail}`);
+                    setShowInvite(false);
+                    setInviteEmail("");
+                    setInviteName("");
+                    setInviteRole("contributor");
+                    fetch();
+                  }
+                }}
+                className="w-full rounded-full bg-wapm-purple text-white"
+              >
+                {inviting ? "Sending..." : "Send Invitation"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

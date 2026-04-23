@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Save, Send, Eye } from "lucide-react";
+import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 
 const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -120,8 +121,8 @@ export default function AdminNewsEditor() {
               </div>
 
               <div>
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Featured Image URL</Label>
-                <Input placeholder="https://..." value={featuredImageUrl} onChange={e => setFeaturedImageUrl(e.target.value)} className="rounded-[10px] mt-1" />
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Featured Image</Label>
+                <ImageUpload value={featuredImageUrl} onChange={setFeaturedImageUrl} folder="news" className="mt-1" />
               </div>
 
               <div>
@@ -148,9 +149,9 @@ export default function AdminNewsEditor() {
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="rounded-[10px] mt-1"><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="food-van">Food Van</SelectItem>
-                  <SelectItem value="sustainable">Sustainable Projects</SelectItem>
-                  <SelectItem value="resident">Resident Projects</SelectItem>
+                  <SelectItem value="homegrown">Homegrown</SelectItem>
+                  <SelectItem value="the-land">The Land</SelectItem>
+                  <SelectItem value="community-pantry">Community Pantry</SelectItem>
                   <SelectItem value="community">Community</SelectItem>
                 </SelectContent>
               </Select>

@@ -13,6 +13,7 @@ import Index from "./pages/Index";
 import Services from "./pages/Services";
 import ServiceDetail from "./pages/ServiceDetail";
 import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
 import Events from "./pages/Events";
 import Gallery from "./pages/Gallery";
 import GetInvolved from "./pages/GetInvolved";
@@ -32,6 +33,7 @@ import AdminEvents from "./pages/admin/AdminEvents";
 import AdminEventEditor from "./pages/admin/AdminEventEditor";
 import AdminGallery from "./pages/admin/AdminGallery";
 import AdminVolunteers from "./pages/admin/AdminVolunteers";
+import AdminVolunteerPositions from "./pages/admin/AdminVolunteerPositions";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminServiceEditor from "./pages/admin/AdminServiceEditor";
@@ -73,7 +75,7 @@ const App = () => (
             <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
             <Route path="/services/:slug" element={<PublicLayout><ServiceDetail /></PublicLayout>} />
             <Route path="/news" element={<PublicLayout><News /></PublicLayout>} />
-            <Route path="/news/:id" element={<PublicLayout><News /></PublicLayout>} />
+            <Route path="/news/:slug" element={<PublicLayout><NewsDetail /></PublicLayout>} />
             <Route path="/events" element={<PublicLayout><Events /></PublicLayout>} />
             <Route path="/events/cancel-rsvp" element={<PublicLayout><CancelRsvp /></PublicLayout>} />
             <Route path="/gallery" element={<PublicLayout><Gallery /></PublicLayout>} />
@@ -96,6 +98,7 @@ const App = () => (
             <Route path="/admin/events/:id/edit" element={<AdminEventEditor />} />
             <Route path="/admin/gallery" element={<AdminGallery />} />
             <Route path="/admin/volunteers" element={<AdminVolunteers />} />
+            <Route path="/admin/volunteer-positions" element={<AdminVolunteerPositions />} />
             <Route path="/admin/messages" element={<AdminMessages />} />
             <Route path="/admin/services" element={<AdminServices />} />
             <Route path="/admin/services/:id/edit" element={<AdminServiceEditor />} />
