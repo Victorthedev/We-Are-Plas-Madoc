@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, UserCog } from "lucide-react";
+import { Plus, UserCog, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,7 @@ export default function AdminStaff() {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [roles, setRoles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteName, setInviteName] = useState("");
@@ -30,15 +31,30 @@ export default function AdminStaff() {
 
   const fetch = async () => {
     setLoading(true);
-    const [{ data: profs }, { data: rls }] = await Promise.all([
+    const [{ data: profs }, { data: rls }, { data: { user } }] = await Promise.all([
       supabase.from("profiles").select("*").order("created_at"),
       supabase.from("user_roles").select("*"),
+      supabase.auth.getUser(),
     ]);
     setProfiles(profs || []);
+    setCurrentUserId(user?.id || null);
     const roleMap: Record<string, string> = {};
     (rls || []).forEach((r: any) => { roleMap[r.user_id] = r.role; });
     setRoles(roleMap);
     setLoading(false);
+  };
+
+  const handleDelete = async (userId: string, name: string) => {
+    if (!confirm(`Permanently delete ${name}'s account? This cannot be undone.`)) return;
+    const { error } = await supabase.functions.invoke("delete-staff", {
+      body: { user_id: userId },
+    });
+    if (error) {
+      toast.error(error.message || "Failed to delete account");
+    } else {
+      toast.success(`${name}'s account has been deleted`);
+      fetch();
+    }
   };
 
   useEffect(() => { fetch(); }, []);
@@ -77,17 +93,20 @@ export default function AdminStaff() {
                   <th className="text-left p-4 font-semibold text-wapm-deep-purple hidden md:table-cell">Email</th>
                   <th className="text-left p-4 font-semibold text-wapm-deep-purple">Role</th>
                   <th className="text-left p-4 font-semibold text-wapm-deep-purple hidden lg:table-cell">Last Active</th>
+                  <th className="p-4" />
                 </tr></thead>
                 <tbody>
                   {profiles.map(p => {
                     const r = roles[p.id];
                     const badge = r ? roleBadge[r] : null;
+                    const isSelf = p.id === currentUserId;
                     return (
                       <tr key={p.id} className="border-b border-wapm-purple/[0.05] hover:bg-wapm-lavender/50">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-wapm-purple/10 flex items-center justify-center text-wapm-purple font-bold text-xs">{p.full_name.charAt(0)}</div>
                             <span className="font-medium text-wapm-deep-purple">{p.full_name}</span>
+                            {isSelf && <span className="text-[10px] px-2 py-0.5 rounded-full bg-wapm-lavender text-muted-foreground">You</span>}
                           </div>
                         </td>
                         <td className="p-4 hidden md:table-cell text-muted-foreground">{p.email}</td>
@@ -97,6 +116,18 @@ export default function AdminStaff() {
                           ) : <span className="text-xs text-muted-foreground">No role</span>}
                         </td>
                         <td className="p-4 hidden lg:table-cell text-muted-foreground text-xs">{formatTimeAgo(p.last_sign_in)}</td>
+                        <td className="p-4 text-right">
+                          {!isSelf && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => handleDelete(p.id, p.full_name)}
+                              className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
