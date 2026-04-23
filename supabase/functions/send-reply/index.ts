@@ -59,7 +59,10 @@ serve(async (req) => {
   let userId: string | null = null;
   try {
     const token = authHeader.replace("Bearer ", "");
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
+    const payload = JSON.parse(atob(padded));
     userId = payload.sub ?? null;
   } catch {
     return json({ error: "Unauthorized" }, 401);
