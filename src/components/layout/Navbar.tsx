@@ -4,18 +4,19 @@ import WAPMLogo from "./WAPMLogo";
 import { Menu, X, ChevronDown } from "lucide-react";
 
 const serviceLinks = [
-  { label: "🚗 Community Car Scheme", to: "/services/community-car" },
+  { label: "🚗 Community Transport", to: "/services/community-transport" },
   { label: "🌿 The Land Adventure Playground", to: "/services/the-land" },
-  { label: "☕ Kettle & Breakfast Club", to: "/services/kettle-club" },
-  { label: "🌻 Little Sunflowers Childcare", to: "/services/little-sunflowers" },
-  { label: "🍱 Mobile Food Van", to: "/services/food-van" },
+  { label: "☕ Kettle Club", to: "/services/kettle-club" },
+  { label: "🌻 Homegrown", to: "/services/homegrown" },
+  { label: "🛒 Community Pantry", to: "/services/community-pantry" },
   { label: "📖 About WAPM", to: "/team" },
 ];
 
 const newsLinks = [
-  { label: "🚐 Mobile Food Van", to: "/news?cat=food-van" },
-  { label: "♻️ Sustainable Projects", to: "/news?cat=sustainable" },
-  { label: "👥 Resident Projects", to: "/news?cat=resident" },
+  { label: "🌻 Homegrown", to: "/news?cat=homegrown" },
+  { label: "🌿 The Land", to: "/news?cat=the-land" },
+  { label: "🛒 Community Pantry", to: "/news?cat=community-pantry" },
+  { label: "👥 Community", to: "/news?cat=community" },
 ];
 
 const navLinks = [

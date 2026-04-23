@@ -400,6 +400,42 @@ export type Database = {
         }
         Relationships: []
       }
+      volunteer_positions: {
+        Row: {
+          commitment: string
+          created_at: string | null
+          display_order: number
+          id: string
+          involved: string
+          is_active: boolean
+          requirements: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          commitment: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          involved?: string
+          is_active?: boolean
+          requirements?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          commitment?: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          involved?: string
+          is_active?: boolean
+          requirements?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       volunteers: {
         Row: {
           created_at: string
