@@ -5,7 +5,7 @@ import { useCountUp } from "@/hooks/useCountUp";
 const stats = [
   { icon: "🚗", number: 1200, suffix: "+", label: "Journeys Made" },
   { icon: "👨‍👩‍👧", number: 300, suffix: "+", label: "Families Supported" },
-  { icon: "⭐", number: 5, suffix: "", label: "Active Services" },
+  { icon: "⭐", number: 6, suffix: "", label: "Active Services" },
   { icon: "📅", number: 10, suffix: "+", label: "Years Serving Plas Madoc" },
 ];
 
