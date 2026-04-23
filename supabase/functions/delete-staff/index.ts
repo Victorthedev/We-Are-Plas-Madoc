@@ -16,8 +16,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const supabaseUrl = Deno.env.get("SUPERBASE_URL")!;
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
@@ -25,17 +24,21 @@ serve(async (req) => {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return json({ error: "Unauthorized" }, 401);
 
-  const userClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authHeader } },
-  });
-  const { data: { user }, error: authError } = await userClient.auth.getUser();
-  if (authError || !user) return json({ error: "Unauthorized" }, 401);
+  let userId: string | null = null;
+  try {
+    const token = authHeader.replace("Bearer ", "");
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    userId = payload.sub ?? null;
+  } catch {
+    return json({ error: "Unauthorized" }, 401);
+  }
+  if (!userId) return json({ error: "Unauthorized" }, 401);
 
   // Verify caller is a super_admin
   const { data: roleRow } = await adminClient
     .from("user_roles")
     .select("role")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .single();
 
   if (roleRow?.role !== "super_admin") return json({ error: "Forbidden: super_admin only" }, 403);
@@ -46,7 +49,7 @@ serve(async (req) => {
     if (!user_id) return json({ error: "user_id is required" }, 400);
 
     // Prevent deleting yourself
-    if (user_id === user.id) return json({ error: "You cannot delete your own account" }, 400);
+    if (user_id === userId) return json({ error: "You cannot delete your own account" }, 400);
 
     // Delete role and profile first, then the auth account
     await adminClient.from("user_roles").delete().eq("user_id", user_id);
