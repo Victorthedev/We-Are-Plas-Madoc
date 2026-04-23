@@ -22,20 +22,21 @@ serve(async (req) => {
 
   // Verify the caller is signed in
   const authHeader = req.headers.get("Authorization");
-  if (!authHeader) return json({ error: "Unauthorized" }, 401);
+  if (!authHeader) return json({ error: "No auth header" }, 401);
 
   const token = authHeader.replace("Bearer ", "");
   const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
-  if (authError || !user) return json({ error: "Unauthorized" }, 401);
+  if (authError || !user) return json({ error: "getUser failed", detail: authError?.message ?? "no user returned" }, 401);
 
   // Verify the caller is a super_admin
-  const { data: roleRow } = await adminClient
+  const { data: roleRow, error: roleError } = await adminClient
     .from("user_roles")
     .select("role")
     .eq("user_id", user.id)
     .single();
 
-  if (roleRow?.role !== "super_admin") return json({ error: "Forbidden: super_admin only" }, 403);
+  if (roleError || !roleRow) return json({ error: "No role found", user_id: user.id }, 403);
+  if (roleRow.role !== "super_admin") return json({ error: "Not super_admin", role: roleRow.role }, 403);
 
   try {
     const { email, full_name, role } = await req.json();
