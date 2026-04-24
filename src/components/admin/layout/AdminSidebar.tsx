@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard, Newspaper, CalendarDays, Image, Users, MessageSquare,
-  Briefcase, UserCog, Settings, LogOut, ChevronLeft, ChevronRight, Handshake, ClipboardList
+  Briefcase, UserCog, Settings, LogOut, ChevronLeft, ChevronRight, Handshake, ClipboardList, BarChart2
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ const navItems = [
   { icon: Handshake, label: "Volunteers", path: "/admin/volunteers", roles: ["super_admin", "editor"] },
   { icon: ClipboardList, label: "Vol. Positions", path: "/admin/volunteer-positions", roles: ["super_admin", "editor"] },
   { icon: MessageSquare, label: "Messages", path: "/admin/messages", roles: ["super_admin", "editor"] },
+  { icon: BarChart2, label: "Analytics", path: "/admin/analytics", roles: ["super_admin", "editor"] },
   { icon: Briefcase, label: "Services", path: "/admin/services", roles: ["super_admin", "editor"] },
   { icon: Users, label: "Team", path: "/admin/team", roles: ["super_admin", "editor"] },
 ];

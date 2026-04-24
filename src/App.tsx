@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -40,6 +41,7 @@ import AdminServiceEditor from "./pages/admin/AdminServiceEditor";
 import AdminTeam from "./pages/admin/AdminTeam";
 import AdminStaff from "./pages/admin/AdminStaff";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +68,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <Analytics />
       <BrowserRouter>
         <AuthProvider>
           <ScrollToTopOnNav />
@@ -104,6 +107,7 @@ const App = () => (
             <Route path="/admin/services/:id/edit" element={<AdminServiceEditor />} />
             <Route path="/admin/team" element={<AdminTeam />} />
             <Route path="/admin/staff" element={<AdminStaff />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
 
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />

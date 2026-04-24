@@ -105,6 +105,9 @@ export type Database = {
           is_free: boolean | null
           location: string | null
           poster_image_url: string | null
+          recurrence_parent_id: string | null
+          recurrence_rule: string | null
+          recurrence_until: string | null
           start_datetime: string
           status: string
           title: string
@@ -120,6 +123,9 @@ export type Database = {
           is_free?: boolean | null
           location?: string | null
           poster_image_url?: string | null
+          recurrence_parent_id?: string | null
+          recurrence_rule?: string | null
+          recurrence_until?: string | null
           start_datetime: string
           status?: string
           title: string
@@ -135,6 +141,9 @@ export type Database = {
           is_free?: boolean | null
           location?: string | null
           poster_image_url?: string | null
+          recurrence_parent_id?: string | null
+          recurrence_rule?: string | null
+          recurrence_until?: string | null
           start_datetime?: string
           status?: string
           title?: string

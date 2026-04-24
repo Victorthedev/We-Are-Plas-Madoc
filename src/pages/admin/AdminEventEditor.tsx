@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Save, Send } from "lucide-react";
 import { toast } from "sonner";
+import ImageUpload from "@/components/ui/ImageUpload";
 
 export default function AdminEventEditor() {
   const { id } = useParams();
@@ -31,6 +32,8 @@ export default function AdminEventEditor() {
   const [isFree, setIsFree] = useState(true);
   const [externalLink, setExternalLink] = useState("");
   const [status, setStatus] = useState("draft");
+  const [recurrenceRule, setRecurrenceRule] = useState("none");
+  const [recurrenceUntil, setRecurrenceUntil] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -53,6 +56,8 @@ export default function AdminEventEditor() {
           setIsFree(data.is_free ?? true);
           setExternalLink(data.external_link || "");
           setStatus(data.status);
+          setRecurrenceRule(data.recurrence_rule || "none");
+          setRecurrenceUntil(data.recurrence_until || "");
         }
       });
     }
@@ -64,20 +69,48 @@ export default function AdminEventEditor() {
     const finalStatus = newStatus || status;
     const startDatetime = new Date(`${startDate}T${startTime || "00:00"}`).toISOString();
     const endDatetime = endDate ? new Date(`${endDate}T${endTime || "23:59"}`).toISOString() : null;
+    const durationMs = endDatetime ? new Date(endDatetime).getTime() - new Date(startDatetime).getTime() : null;
 
-    const payload = {
+    const basePayload = {
       title, description, start_datetime: startDatetime, end_datetime: endDatetime,
       location: location || null, event_type: eventType || null,
       poster_image_url: posterUrl || null, is_free: isFree,
       external_link: externalLink || null, status: finalStatus,
+      recurrence_rule: recurrenceRule,
+      recurrence_until: recurrenceRule !== "none" && recurrenceUntil ? recurrenceUntil : null,
       updated_at: new Date().toISOString(),
     };
 
     let error;
     if (isNew) {
-      ({ error } = await supabase.from("events").insert(payload));
+      const { data: inserted, error: insertErr } = await supabase.from("events").insert(basePayload).select("id").single();
+      error = insertErr;
+
+      // Generate recurrence instances after the parent is created
+      if (!insertErr && inserted && recurrenceRule !== "none" && recurrenceUntil) {
+        const untilDate = new Date(recurrenceUntil);
+        const stepDays = recurrenceRule === "weekly" ? 7 : recurrenceRule === "fortnightly" ? 14 : 30;
+        const instances = [];
+        let cursor = new Date(startDatetime);
+        cursor.setDate(cursor.getDate() + stepDays);
+        while (cursor <= untilDate) {
+          const instanceStart = cursor.toISOString();
+          const instanceEnd = durationMs ? new Date(cursor.getTime() + durationMs).toISOString() : null;
+          instances.push({
+            ...basePayload,
+            start_datetime: instanceStart,
+            end_datetime: instanceEnd,
+            recurrence_parent_id: inserted.id,
+          });
+          cursor = new Date(cursor);
+          cursor.setDate(cursor.getDate() + stepDays);
+        }
+        if (instances.length > 0) {
+          await supabase.from("events").insert(instances);
+        }
+      }
     } else {
-      ({ error } = await supabase.from("events").update(payload).eq("id", id));
+      ({ error } = await supabase.from("events").update(basePayload).eq("id", id));
     }
 
     if (error) toast.error(error.message);
@@ -147,8 +180,29 @@ export default function AdminEventEditor() {
                 <Label>Free Entry</Label>
                 <Switch checked={isFree} onCheckedChange={setIsFree} />
               </div>
-              <div><Label>Poster Image URL</Label><Input value={posterUrl} onChange={e => setPosterUrl(e.target.value)} className="rounded-[10px] mt-1" /></div>
+              <div>
+                <Label>Poster / Event Photo</Label>
+                <ImageUpload value={posterUrl} onChange={setPosterUrl} folder="events" className="mt-1" />
+              </div>
               <div><Label>External Link</Label><Input value={externalLink} onChange={e => setExternalLink(e.target.value)} className="rounded-[10px] mt-1" /></div>
+              <div>
+                <Label>Recurrence</Label>
+                <Select value={recurrenceRule} onValueChange={setRecurrenceRule}>
+                  <SelectTrigger className="rounded-[10px] mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Does not repeat</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="fortnightly">Fortnightly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {recurrenceRule !== "none" && (
+                <div>
+                  <Label>Repeat until</Label>
+                  <Input type="date" value={recurrenceUntil} onChange={e => setRecurrenceUntil(e.target.value)} className="rounded-[10px] mt-1" />
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
