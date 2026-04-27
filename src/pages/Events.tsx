@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import RsvpButton from "@/components/events/RsvpButton";
@@ -43,7 +43,7 @@ export default function Events() {
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
   const formatTime = (d: string) => new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-  const getEventUrl = (evt: any) => `https://weareplasmadoc.co.uk/events#${evt.id}`;
+  const getEventUrl = (evt: any) => `${window.location.origin}/events/${evt.id}`;
 
   return (
     <main id="main">
@@ -74,6 +74,7 @@ export default function Events() {
                       {evt.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{evt.description}</p>}
                       <div className="flex items-center justify-between gap-2">
                         <RsvpButton event={evt} size="sm" />
+                        <Link to={`/events/${evt.id}`} className="text-xs text-primary hover:underline shrink-0">View Details →</Link>
                       </div>
                       <div className="mt-3 pt-3 border-t border-border">
                         <EventShareButtons eventName={evt.title} eventUrl={getEventUrl(evt)} />
@@ -152,6 +153,7 @@ export default function Events() {
                       {evt.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{evt.description}</p>}
                       <div className="flex items-center gap-3 mt-3">
                         <RsvpButton event={evt} size="sm" />
+                        <Link to={`/events/${evt.id}`} className="text-xs text-primary hover:underline">View Details →</Link>
                       </div>
                     </div>
                   ))}

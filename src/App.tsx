@@ -42,6 +42,7 @@ import AdminTeam from "./pages/admin/AdminTeam";
 import AdminStaff from "./pages/admin/AdminStaff";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import EventDetail from "./pages/EventDetail";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
             <Route path="/news/:slug" element={<PublicLayout><NewsDetail /></PublicLayout>} />
             <Route path="/events" element={<PublicLayout><Events /></PublicLayout>} />
             <Route path="/events/cancel-rsvp" element={<PublicLayout><CancelRsvp /></PublicLayout>} />
+            <Route path="/events/:id" element={<PublicLayout><EventDetail /></PublicLayout>} />
             <Route path="/gallery" element={<PublicLayout><Gallery /></PublicLayout>} />
             <Route path="/get-involved" element={<PublicLayout><GetInvolved /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
