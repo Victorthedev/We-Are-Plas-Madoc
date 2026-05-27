@@ -20,6 +20,10 @@ export default function Events() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) =>
+    setExpandedCards(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
   useEffect(() => {
     supabase.from("events").select("*").eq("status", "published").order("start_datetime", { ascending: true })
@@ -71,10 +75,27 @@ export default function Events() {
                           <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {evt.location || "TBC"} · <Clock className="w-3 h-3" /> {formatTime(evt.start_datetime)}</p>
                         </div>
                       </div>
-                      {evt.description && <p className="text-xs text-muted-foreground line-clamp-3 mb-4 flex-1">{evt.description}</p>}
+                      {evt.description && (
+                        <div className="mb-4 flex-1">
+                          <p className={`text-xs text-muted-foreground ${expandedCards.has(evt.id) ? "" : "line-clamp-3"}`}>
+                            {evt.description}
+                          </p>
+                          <button
+                            onClick={() => toggleExpand(evt.id)}
+                            className="text-xs text-primary font-medium mt-1 hover:underline"
+                          >
+                            {expandedCards.has(evt.id) ? "See less" : "See more"}
+                          </button>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between gap-2 mt-auto">
                         <RsvpButton event={evt} size="sm" />
-                        <Link to={`/events/${evt.id}`} className="text-xs text-primary hover:underline shrink-0">View Details →</Link>
+                        <Link
+                          to={`/events/${evt.id}`}
+                          className="text-xs font-medium px-3 py-1.5 rounded-full border border-primary/30 text-primary hover:bg-primary hover:text-white transition-colors shrink-0"
+                        >
+                          View Details →
+                        </Link>
                       </div>
                       <div className="mt-3 pt-3 border-t border-border">
                         <EventShareButtons eventName={evt.title} eventUrl={getEventUrl(evt)} />
