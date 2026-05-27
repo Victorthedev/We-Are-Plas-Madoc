@@ -80,11 +80,11 @@ export default function EventDetail() {
             <div className="card-wapm overflow-hidden">
               {/* Poster image */}
               {event.poster_image_url && (
-                <div className="w-full h-64 md:h-80 overflow-hidden">
+                <div className="w-full bg-wapm-lavender flex items-center justify-center p-4">
                   <img
                     src={event.poster_image_url}
                     alt={event.title}
-                    className="w-full h-full object-cover"
+                    className="max-w-full max-h-[600px] object-contain rounded-xl"
                   />
                 </div>
               )}

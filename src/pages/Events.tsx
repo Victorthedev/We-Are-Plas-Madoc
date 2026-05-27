@@ -56,11 +56,11 @@ export default function Events() {
             {upcomingEvents.length === 0 ? (
               <p className="text-muted-foreground">No upcoming events. Check back soon!</p>
             ) : (
-              <div className="flex gap-4 overflow-x-auto pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {upcomingEvents.slice(0, 6).map((evt) => {
                   const d = new Date(evt.start_datetime);
                   return (
-                    <div key={evt.id} className="card-wapm p-6 min-w-[300px] flex-shrink-0" id={evt.id}>
+                    <div key={evt.id} className="card-wapm p-6 flex flex-col" id={evt.id}>
                       <div className="flex gap-4 mb-4">
                         <div className="w-14 h-14 rounded-full bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
                           <span className="text-lg font-bold text-primary leading-none">{d.getDate()}</span>
@@ -71,8 +71,8 @@ export default function Events() {
                           <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {evt.location || "TBC"} · <Clock className="w-3 h-3" /> {formatTime(evt.start_datetime)}</p>
                         </div>
                       </div>
-                      {evt.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{evt.description}</p>}
-                      <div className="flex items-center justify-between gap-2">
+                      {evt.description && <p className="text-xs text-muted-foreground line-clamp-3 mb-4 flex-1">{evt.description}</p>}
+                      <div className="flex items-center justify-between gap-2 mt-auto">
                         <RsvpButton event={evt} size="sm" />
                         <Link to={`/events/${evt.id}`} className="text-xs text-primary hover:underline shrink-0">View Details →</Link>
                       </div>
