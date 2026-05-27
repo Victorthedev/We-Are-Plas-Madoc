@@ -33,7 +33,7 @@ export default function RsvpButton({ event, size = "default" }: RsvpButtonProps)
 
   if (hasRsvpd) {
     return (
-      <span className={`inline-flex items-center gap-1.5 rounded-full border-2 border-wapm-green text-wapm-green font-semibold ${size === "sm" ? "px-3 py-1 text-xs" : "px-5 py-2 text-sm"}`}>
+      <span className={`inline-flex items-center gap-1.5 rounded-full border-2 border-wapm-green text-wapm-green font-semibold ${size === "sm" ? "h-7 px-3 text-xs" : "px-5 py-2 text-sm"}`}>
         <Check className={size === "sm" ? "w-3 h-3" : "w-4 h-4"} /> You're Attending
       </span>
     );
@@ -43,8 +43,8 @@ export default function RsvpButton({ event, size = "default" }: RsvpButtonProps)
     <>
       <Button
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-        className={`rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold ${size === "sm" ? "px-3 py-1 h-auto text-xs" : ""}`}
-        size={size === "sm" ? "sm" : "default"}
+        size="default"
+        className={`rounded-full font-semibold ${size === "sm" ? "h-7 px-3 text-xs" : "px-5"}`}
       >
         I'm Attending
       </Button>
