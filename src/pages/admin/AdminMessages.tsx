@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Trash2, CheckCheck, Send } from "lucide-react";
+import { Mail, Trash2, CheckCheck, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,6 @@ export default function AdminMessages() {
   const [selected, setSelected] = useState<any>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
   const [replyText, setReplyText] = useState("");
-  const [replying, setReplying] = useState(false);
 
   const fetch = async () => {
     setLoading(true);
@@ -50,9 +49,9 @@ export default function AdminMessages() {
     fetch();
   };
 
+  /* send-reply temporarily disabled — Resend domain verification pending DNS transfer
   const sendReply = async () => {
     if (!selected || !replyText.trim()) return;
-    setReplying(true);
     const { error } = await supabase.functions.invoke("send-reply", {
       body: {
         to_email: selected.email,
@@ -62,13 +61,16 @@ export default function AdminMessages() {
         staff_name: profile?.full_name || "The WAPM Team",
       },
     });
-    setReplying(false);
-    if (error) {
-      toast.error("Failed to send reply. Please try again.");
-    } else {
-      toast.success(`Reply sent to ${selected.name}`);
-      setReplyText("");
-    }
+    if (error) toast.error("Failed to send reply. Please try again.");
+    else { toast.success(`Reply sent to ${selected.name}`); setReplyText(""); }
+  };
+  */
+
+  const openMailto = () => {
+    if (!selected || !replyText.trim()) return;
+    const subject = encodeURIComponent(`Re: ${selected.subject || "Your message to WAPM"}`);
+    const body = encodeURIComponent(replyText.trim());
+    window.location.href = `mailto:${selected.email}?subject=${subject}&body=${body}`;
   };
 
   const formatTime = (d: string) => {
@@ -169,14 +171,15 @@ export default function AdminMessages() {
                     placeholder={`Write your reply to ${selected.email}...`}
                     className="rounded-xl text-sm min-h-[120px] resize-none"
                   />
-                  <div className="flex justify-end mt-2">
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-[11px] text-muted-foreground">Opens your email client with the reply pre-filled</p>
                     <Button
-                      onClick={sendReply}
-                      disabled={replying || !replyText.trim()}
+                      onClick={openMailto}
+                      disabled={!replyText.trim()}
                       className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white text-sm"
                     >
-                      <Send className="w-3.5 h-3.5 mr-1.5" />
-                      {replying ? "Sending..." : "Send Reply"}
+                      <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+                      Open in Email
                     </Button>
                   </div>
                 </div>
