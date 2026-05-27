@@ -64,7 +64,7 @@ export default function Contact() {
                 <div className="space-y-6">
                   {[
                     { name: "Claire Pugh", role: "AVOW Play Department Manager & Community Development Manager", phone: "01978 813912" },
-                    { name: "Donna Jordan", role: "AVOW Play Team & Community Development Officer", phone: "07394465113" },
+                    { name: "Katie St John", role: "Community Connections Officer", phone: "07394465113" },
                     { name: "Community Transport", role: "Transport booking line", phone: "07423503836" },
                   ].map(person => (
                     <div key={person.name}>
