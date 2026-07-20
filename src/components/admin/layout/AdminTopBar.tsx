@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Menu } from "lucide-react";
+import { ListIcon } from "@phosphor-icons/react";
 
 interface AdminTopBarProps {
   title: string;
@@ -11,20 +11,20 @@ export default function AdminTopBar({ title, breadcrumb, onMenuClick }: AdminTop
   const { profile } = useAuth();
 
   return (
-    <header className="h-16 bg-wapm-lavender border-b border-wapm-purple/[0.12] shadow-[0_2px_8px_rgba(0,0,0,0.06)] flex items-center justify-between px-6 sticky top-0 z-40">
-      <div className="flex items-center gap-4">
+    <header className="font-admin h-16 bg-card border-b border-admin-border shadow-[0_1px_2px_rgba(20,20,30,0.04)] flex items-center justify-between px-4 sm:px-6 sticky top-0 z-40">
+      <div className="flex items-center gap-3 sm:gap-4 min-w-0">
         {onMenuClick && (
-          <button onClick={onMenuClick} className="lg:hidden text-wapm-deep">
-            <Menu className="w-5 h-5" />
+          <button onClick={onMenuClick} className="lg:hidden text-foreground shrink-0" aria-label="Open menu">
+            <ListIcon className="w-5 h-5" />
           </button>
         )}
-        <div>
-          <h1 className="text-xl font-semibold text-wapm-deep">{title}</h1>
-          {breadcrumb && <p className="text-xs text-muted-foreground">{breadcrumb}</p>}
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-xl font-semibold text-foreground truncate">{title}</h1>
+          {breadcrumb && <p className="text-xs text-muted-foreground truncate">{breadcrumb}</p>}
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-wapm-purple/10 flex items-center justify-center text-wapm-purple text-xs font-bold">
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
           {profile?.full_name?.charAt(0) || "?"}
         </div>
       </div>

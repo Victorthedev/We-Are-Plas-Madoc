@@ -3,6 +3,8 @@ import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/superbase/client";
+import { ClipboardTextIcon, ArrowUpRightIcon } from "@phosphor-icons/react";
+import { serviceIcons } from "@/lib/serviceIcons";
 
 type Service = {
   id: string;
@@ -40,16 +42,23 @@ export default function Services() {
             <div className="text-center py-20 text-muted-foreground">Loading...</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {services.map((s, i) => (
+              {services.map((s, i) => {
+                const ServiceIcon = serviceIcons[s.slug] || ClipboardTextIcon;
+                return (
                 <AnimatedSection key={s.id} delay={i * 0.1}>
-                  <Link to={`/services/${s.slug}`} className="card-wapm p-8 h-full block border-t-[3px] border-transparent hover:border-primary group">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl mb-5">{s.icon || "📋"}</div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">{s.name}</h3>
+                  <Link to={`/services/${s.slug}`} className="card-wapm relative flex flex-col p-8 h-full border-t-[3px] border-transparent hover:border-primary group">
+                    <span className="absolute top-8 right-8 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                      <ArrowUpRightIcon className="w-4 h-4" weight="bold" />
+                    </span>
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-5 group-hover:animate-[wiggle_0.4s_ease-in-out]">
+                      <ServiceIcon className="w-7 h-7" weight="duotone" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-3 pr-10">{s.name}</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">{s.description}</p>
-                    <span className="text-primary font-semibold text-sm mt-4 inline-block group-hover:text-accent transition-colors">Learn More →</span>
                   </Link>
                 </AnimatedSection>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

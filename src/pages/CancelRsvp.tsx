@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "../integrations/superbase/client";
 import { Button } from "@/components/ui/button";
 import PageHero from "@/components/layout/PageHero";
+import { HandWavingIcon } from "@phosphor-icons/react";
 
 export default function CancelRsvp() {
   const [params] = useSearchParams();
@@ -54,7 +55,9 @@ export default function CancelRsvp() {
               </>
             ) : cancelled ? (
               <>
-                <div className="text-5xl mb-4">👋</div>
+                <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                  <HandWavingIcon className="w-9 h-9" weight="duotone" />
+                </div>
                 <p className="text-lg font-semibold text-foreground mb-2">Your RSVP has been cancelled.</p>
                 <p className="text-muted-foreground">Hope to see you next time!</p>
               </>

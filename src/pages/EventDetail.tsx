@@ -5,7 +5,7 @@ import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import RsvpButton from "@/components/events/RsvpButton";
 import EventShareButtons from "@/components/events/EventShareButtons";
-import { MapPin, Clock, Calendar, ArrowLeft, Tag } from "lucide-react";
+import { MapPinIcon, ClockIcon, CalendarIcon, ArrowLeftIcon, TagIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -74,7 +74,7 @@ export default function EventDetail() {
               onClick={() => navigate("/events")}
               className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline mb-8"
             >
-              <ArrowLeft className="w-4 h-4" /> Back to Events
+              <ArrowLeftIcon className="w-4 h-4" /> Back to Events
             </button>
 
             <div className="card-wapm overflow-hidden">
@@ -97,7 +97,7 @@ export default function EventDetail() {
                   )}
                   {event.event_type && (
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-wapm-purple/10 text-wapm-purple text-xs font-semibold capitalize">
-                      <Tag className="w-3 h-3" />{event.event_type.replace("-", " ")}
+                      <TagIcon className="w-3 h-3" weight="duotone" />{event.event_type.replace("-", " ")}
                     </span>
                   )}
                   {event.status === "cancelled" && (
@@ -113,19 +113,19 @@ export default function EventDetail() {
                 {/* Details */}
                 <div className="space-y-3 mb-8">
                   <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+                    <CalendarIcon className="w-4 h-4 shrink-0 mt-0.5 text-primary" weight="duotone" />
                     <span>{formatDate(event.start_datetime)}</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+                    <ClockIcon className="w-4 h-4 shrink-0 mt-0.5 text-primary" weight="duotone" />
                     <span>
                       {formatTime(event.start_datetime)}
-                      {event.end_datetime && ` – ${formatTime(event.end_datetime)}`}
+                      {event.end_datetime && ` to ${formatTime(event.end_datetime)}`}
                     </span>
                   </div>
                   {event.location && (
                     <div className="flex items-start gap-3 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+                      <MapPinIcon className="w-4 h-4 shrink-0 mt-0.5 text-primary" weight="duotone" />
                       <span>{event.location}</span>
                     </div>
                   )}
@@ -144,9 +144,9 @@ export default function EventDetail() {
                     href={event.external_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block text-sm text-primary hover:underline mb-8"
+                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline mb-8"
                   >
-                    More information →
+                    More information <ArrowRightIcon className="w-3.5 h-3.5" weight="bold" />
                   </a>
                 )}
 
@@ -160,7 +160,7 @@ export default function EventDetail() {
 
                 {isPast && (
                   <div className="border-t border-border pt-6 mb-6">
-                    <p className="text-sm text-muted-foreground">This event has passed. <Link to="/events" className="text-primary hover:underline">Browse upcoming events →</Link></p>
+                    <p className="text-sm text-muted-foreground">This event has passed. <Link to="/events" className="inline-flex items-center gap-1 text-primary hover:underline">Browse upcoming events <ArrowRightIcon className="w-3.5 h-3.5" weight="bold" /></Link></p>
                   </div>
                 )}
 

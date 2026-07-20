@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, ClipboardList } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { PlusIcon, PencilSimpleIcon, TrashIcon, ClipboardTextIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +34,8 @@ export default function AdminVolunteerPositions() {
   const [editing, setEditing] = useState<Position | null>(null);
   const [form, setForm] = useState(empty);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Position | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetch = async () => {
     setLoading(true);
@@ -95,20 +97,23 @@ export default function AdminVolunteerPositions() {
     fetch();
   };
 
-  const handleDelete = async (p: Position) => {
-    if (!confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
-    await supabase.from("volunteer_positions").delete().eq("id", p.id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    await supabase.from("volunteer_positions").delete().eq("id", deleteTarget.id);
     toast.success("Position deleted");
+    setDeleting(false);
+    setDeleteTarget(null);
     fetch();
   };
 
   return (
     <AdminShell title="Volunteer Positions" breadcrumb="Dashboard > Volunteer Positions">
       <PermissionGuard roles={["super_admin", "editor"]}>
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
           <p className="text-sm text-muted-foreground">Manage the volunteer roles shown on the Get Involved page. Toggle a position off to hide it without deleting it.</p>
-          <Button onClick={openNew} className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white shrink-0 ml-4">
-            <Plus className="w-4 h-4 mr-1" /> New Position
+          <Button onClick={openNew} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shrink-0 sm:ml-4 w-full sm:w-auto">
+            <PlusIcon className="w-4 h-4 mr-1" weight="bold" /> New Position
           </Button>
         </div>
 
@@ -116,33 +121,35 @@ export default function AdminVolunteerPositions() {
           <div className="text-center py-12 text-muted-foreground">Loading...</div>
         ) : positions.length === 0 ? (
           <div className="text-center py-12">
-            <ClipboardList className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg font-semibold text-wapm-deep-purple">No positions yet</p>
+            <ClipboardTextIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-lg font-semibold text-foreground">No positions yet</p>
             <p className="text-sm text-muted-foreground mt-1">Add your first volunteer role to get started.</p>
-            <Button onClick={openNew} className="mt-4 rounded-full bg-wapm-purple text-white"><Plus className="w-4 h-4 mr-1" /> Add Position</Button>
+            <Button onClick={openNew} className="mt-4 rounded-full bg-primary text-primary-foreground"><PlusIcon className="w-4 h-4 mr-1" weight="bold" /> Add Position</Button>
           </div>
         ) : (
           <div className="space-y-3">
             {positions.map(p => (
-              <Card key={p.id} className={cn("rounded-2xl border-wapm-purple/[0.12] shadow-[0_2px_12px_rgba(45,27,78,0.08)] transition-opacity", !p.is_active && "opacity-50")}>
-                <CardContent className="p-5 flex items-center gap-4">
+              <Card key={p.id} className={cn("rounded-2xl border-admin-border shadow-[0_2px_12px_rgba(20,20,30,0.06)] transition-opacity", !p.is_active && "opacity-50")}>
+                <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-wapm-deep-purple">{p.title}</h3>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-wapm-purple/10 text-wapm-purple">{p.commitment}</span>
+                      <h3 className="font-semibold text-foreground">{p.title}</h3>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{p.commitment}</span>
                       {!p.is_active && <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Hidden</span>}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                       {p.involved.split("\n").filter(Boolean)[0]}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-muted-foreground">{p.is_active ? "Live" : "Hidden"}</span>
                       <Switch checked={p.is_active} onCheckedChange={() => toggleActive(p)} />
                     </div>
-                    <Button size="icon" variant="ghost" onClick={() => openEdit(p)} className="h-8 w-8 text-wapm-purple"><Pencil className="w-4 h-4" /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => handleDelete(p)} className="h-8 w-8 text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                    <div className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => openEdit(p)} className="h-9 w-9 text-primary" aria-label="Edit position"><PencilSimpleIcon className="w-4 h-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => setDeleteTarget(p)} className="h-9 w-9 text-destructive" aria-label="Delete position"><TrashIcon className="w-4 h-4" /></Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -156,7 +163,7 @@ export default function AdminVolunteerPositions() {
               <DialogTitle>{editing ? "Edit Position" : "New Volunteer Position"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-2">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Title *</Label>
                   <Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="rounded-[10px] mt-1" placeholder="e.g. Volunteer Driver" />
@@ -198,10 +205,24 @@ export default function AdminVolunteerPositions() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleSave} disabled={saving} className="w-full rounded-full bg-wapm-purple text-white">
+              <Button onClick={handleSave} disabled={saving} className="w-full rounded-full bg-primary text-primary-foreground">
                 {saving ? "Saving..." : editing ? "Save Changes" : "Create Position"}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete confirmation */}
+        <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+          <DialogContent className="sm:max-w-sm rounded-2xl">
+            <DialogHeader><DialogTitle className="text-foreground">Delete position?</DialogTitle></DialogHeader>
+            <p className="text-muted-foreground text-sm">Delete <strong>{deleteTarget?.title}</strong>? This cannot be undone.</p>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setDeleteTarget(null)} className="rounded-full">Go Back</Button>
+              <Button onClick={handleDelete} disabled={deleting} className="rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                {deleting ? "Deleting..." : "Delete Position"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </PermissionGuard>

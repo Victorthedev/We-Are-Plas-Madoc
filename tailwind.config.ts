@@ -12,7 +12,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Poppins', 'sans-serif'],
+        sans: ['Nunito', 'sans-serif'],
+        display: ['Fredoka', 'sans-serif'],
+        admin: ['Manrope', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -36,6 +38,10 @@ export default {
         "wapm-pink": "hsl(var(--wapm-pink))",
         "wapm-lavender": "hsl(var(--wapm-lavender))",
         "wapm-green": "hsl(var(--wapm-green))",
+        "admin-chrome": "hsl(var(--admin-chrome))",
+        "admin-chrome-border": "hsl(var(--admin-chrome-border))",
+        "admin-surface": "hsl(var(--admin-surface))",
+        "admin-border": "hsl(var(--admin-border))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

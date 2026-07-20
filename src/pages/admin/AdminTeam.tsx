@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { PlusIcon, PencilSimpleIcon, TrashIcon, UsersIcon } from "@phosphor-icons/react";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 
@@ -21,6 +21,8 @@ export default function AdminTeam() {
   const [editMember, setEditMember] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: "", role: "", bio: "", photo_url: "", social_link: "", is_trustee: false });
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetch = async () => {
     setLoading(true);
@@ -60,16 +62,25 @@ export default function AdminTeam() {
     fetch();
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    await supabase.from("team_members").delete().eq("id", deleteTarget.id);
+    toast.success("Removed");
+    setDeleting(false);
+    setDeleteTarget(null);
+    fetch();
+  };
+
   const staff = members.filter(m => !m.is_trustee);
   const trustees = members.filter(m => m.is_trustee);
 
   return (
     <AdminShell title="Team Members" breadcrumb="Dashboard > Team">
       <PermissionGuard roles={["super_admin", "editor"]}>
-        <div className="flex justify-between items-center mb-6">
-          <div />
-          <Button onClick={openNew} className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white">
-            <Plus className="w-4 h-4 mr-1" /> Add Member
+        <div className="flex justify-end mb-6">
+          <Button onClick={openNew} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
+            <PlusIcon className="w-4 h-4 mr-1" weight="bold" /> Add Member
           </Button>
         </div>
 
@@ -77,32 +88,28 @@ export default function AdminTeam() {
           <div className="text-center py-12 text-muted-foreground">Loading...</div>
         ) : members.length === 0 ? (
           <div className="text-center py-12">
-            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg font-semibold text-wapm-deep-purple">No team members yet</p>
+            <UsersIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-lg font-semibold text-foreground">No team members yet</p>
           </div>
         ) : (
           <>
             {staff.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-wapm-deep-purple mb-4">Team Members</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">Team Members</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {staff.map(m => (
-                    <Card key={m.id} className="rounded-2xl border-wapm-purple/[0.12]">
+                    <Card key={m.id} className="rounded-2xl border-admin-border">
                       <CardContent className="p-5 flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-full bg-wapm-purple/10 flex items-center justify-center text-wapm-purple font-bold text-lg shrink-0">
+                        <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
                           {m.name.charAt(0)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-wapm-deep-purple truncate">{m.name}</h4>
-                          <p className="text-xs text-wapm-purple">{m.role}</p>
+                          <h4 className="font-semibold text-foreground truncate">{m.name}</h4>
+                          <p className="text-xs text-primary">{m.role}</p>
                         </div>
                         <div className="flex gap-1">
-                          <Button size="icon" variant="ghost" onClick={() => openEdit(m)} className="h-8 w-8 text-wapm-purple"><Pencil className="w-3 h-3" /></Button>
-                          <Button size="icon" variant="ghost" onClick={async () => {
-                            if (!confirm(`Remove ${m.name}?`)) return;
-                            await supabase.from("team_members").delete().eq("id", m.id);
-                            toast.success("Removed"); fetch();
-                          }} className="h-8 w-8 text-red-500"><Trash2 className="w-3 h-3" /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => openEdit(m)} className="h-9 w-9 text-primary" aria-label="Edit member"><PencilSimpleIcon className="w-4 h-4" /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => setDeleteTarget(m)} className="h-9 w-9 text-destructive" aria-label="Remove member"><TrashIcon className="w-4 h-4" /></Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -113,21 +120,17 @@ export default function AdminTeam() {
 
             {trustees.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-wapm-deep-purple mb-4">Trustees</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">Trustees</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {trustees.map(m => (
-                    <Card key={m.id} className="rounded-2xl border-wapm-purple/[0.12]">
+                    <Card key={m.id} className="rounded-2xl border-admin-border">
                       <CardContent className="p-4 text-center">
-                        <div className="w-12 h-12 rounded-full bg-wapm-purple/10 mx-auto flex items-center justify-center text-wapm-purple font-bold mb-2">{m.name.charAt(0)}</div>
-                        <h4 className="font-semibold text-wapm-deep-purple text-sm">{m.name}</h4>
+                        <div className="w-12 h-12 rounded-full bg-primary/10 mx-auto flex items-center justify-center text-primary font-bold mb-2">{m.name.charAt(0)}</div>
+                        <h4 className="font-semibold text-foreground text-sm">{m.name}</h4>
                         <p className="text-xs text-muted-foreground">{m.role}</p>
                         <div className="flex justify-center gap-1 mt-2">
-                          <Button size="icon" variant="ghost" onClick={() => openEdit(m)} className="h-7 w-7"><Pencil className="w-3 h-3" /></Button>
-                          <Button size="icon" variant="ghost" onClick={async () => {
-                            if (!confirm(`Remove ${m.name}?`)) return;
-                            await supabase.from("team_members").delete().eq("id", m.id);
-                            toast.success("Removed"); fetch();
-                          }} className="h-7 w-7 text-red-500"><Trash2 className="w-3 h-3" /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => openEdit(m)} className="h-8 w-8 text-primary" aria-label="Edit member"><PencilSimpleIcon className="w-3.5 h-3.5" /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => setDeleteTarget(m)} className="h-8 w-8 text-destructive" aria-label="Remove member"><TrashIcon className="w-3.5 h-3.5" /></Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -154,8 +157,22 @@ export default function AdminTeam() {
                 <Checkbox checked={form.is_trustee} onCheckedChange={v => setForm({ ...form, is_trustee: !!v })} />
                 <Label>This person is a Trustee</Label>
               </div>
-              <Button onClick={handleSave} className="w-full rounded-full bg-wapm-purple text-white">Save</Button>
+              <Button onClick={handleSave} className="w-full rounded-full bg-primary text-primary-foreground">Save</Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete confirmation */}
+        <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+          <DialogContent className="sm:max-w-sm rounded-2xl">
+            <DialogHeader><DialogTitle className="text-foreground">Remove team member?</DialogTitle></DialogHeader>
+            <p className="text-muted-foreground text-sm">Remove <strong>{deleteTarget?.name}</strong>? This cannot be undone.</p>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setDeleteTarget(null)} className="rounded-full">Go Back</Button>
+              <Button onClick={handleDelete} disabled={deleting} className="rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                {deleting ? "Removing..." : "Remove"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </PermissionGuard>

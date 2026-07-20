@@ -33,9 +33,15 @@
     --wapm-pink: 327 82% 52%;
     --wapm-lavender: 249 100% 98%;
     --wapm-green: 145 50% 36%;
-    --shadow-card: 0 4px 20px rgba(142, 68, 173, 0.08);
-    --shadow-card-hover: 0 12px 40px rgba(142, 68, 173, 0.2);
-    --shadow-nav: 0 2px 20px rgba(0, 0, 0, 0.1);
+    --shadow-card: 0 1px 2px rgba(24, 16, 40, 0.04), 0 8px 24px rgba(24, 16, 40, 0.06);
+    --shadow-card-hover: 0 1px 2px rgba(24, 16, 40, 0.04), 0 16px 32px rgba(24, 16, 40, 0.1);
+    --shadow-nav: 0 1px 0 rgba(24, 16, 40, 0.06);
+    --bevel-primary: hsl(var(--wapm-deep-purple));
+    --bevel-card: hsl(283 15% 82%);
+    --admin-chrome: 260 15% 12%;
+    --admin-chrome-border: 260 12% 20%;
+    --admin-surface: 240 8% 97%;
+    --admin-border: 240 10% 88%;
     --sidebar-background: 264 48% 21%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 283 39% 53%;
@@ -51,12 +57,12 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Poppins', sans-serif;
+    @apply bg-background text-foreground font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    letter-spacing: -0.02em;
+    @apply font-display;
+    letter-spacing: -0.01em;
     line-height: 1.2;
   }
 
@@ -66,35 +72,44 @@
 }
 
 @layer components {
+  /* Tactile "pressable" buttons: a solid bevel edge instead of a colored glow.
+     Press down on click, spring back on release — no gradients, no blur. */
+  .btn-tactile {
+    @apply font-display rounded-2xl px-8 py-3 font-semibold inline-block text-center select-none
+           transition-transform duration-100 ease-out;
+    transform: translateY(0);
+  }
+  .btn-tactile:hover { transform: translateY(-2px); }
+  .btn-tactile:active { transform: translateY(2px); transition-duration: 50ms; }
+
   .btn-primary {
-    @apply bg-primary text-primary-foreground rounded-full px-8 py-3 font-semibold
-           transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] inline-block text-center;
-    box-shadow: 0 4px 15px hsl(var(--primary) / 0.3);
+    @apply btn-tactile bg-primary text-primary-foreground;
+    box-shadow: 0 4px 0 0 var(--bevel-primary);
   }
-  .btn-primary:hover {
-    box-shadow: 0 6px 25px hsl(var(--primary) / 0.4);
-  }
+  .btn-primary:hover { box-shadow: 0 6px 0 0 var(--bevel-primary); }
+  .btn-primary:active { box-shadow: 0 1px 0 0 var(--bevel-primary); }
 
   .btn-outline-primary {
-    @apply border-2 border-primary text-primary rounded-full px-8 py-3 font-semibold bg-transparent
-           transition-all duration-200 hover:bg-primary hover:text-primary-foreground hover:scale-[1.03] active:scale-[0.97] inline-block text-center;
+    @apply btn-tactile border-2 border-primary text-primary bg-transparent
+           hover:bg-primary hover:text-primary-foreground;
   }
+  .btn-outline-primary:active { transform: translateY(1px); }
 
-  .btn-hero {
-    @apply rounded-full px-8 py-4 font-semibold text-base
-           transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] inline-block text-center;
-  }
   .btn-hero-filled {
-    @apply btn-hero;
+    @apply btn-tactile;
     background: hsl(var(--card));
     color: hsl(var(--wapm-deep));
+    box-shadow: 0 4px 0 0 var(--bevel-card);
   }
   .btn-hero-filled:hover {
     background: hsl(var(--accent));
     color: hsl(var(--accent-foreground));
+    box-shadow: 0 6px 0 0 hsl(201 71% 48%);
   }
+  .btn-hero-filled:active { box-shadow: 0 1px 0 0 var(--bevel-card); }
+
   .btn-hero-outline {
-    @apply btn-hero border-2;
+    @apply btn-tactile border-2;
     border-color: hsl(var(--card));
     color: hsl(var(--card));
     background: transparent;
@@ -103,6 +118,7 @@
     background: hsl(var(--card));
     color: hsl(var(--wapm-deep));
   }
+  .btn-hero-outline:active { transform: translateY(1px); }
 
   .pill-badge {
     @apply inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold;
@@ -119,7 +135,7 @@
   }
 
   .card-wapm {
-    @apply bg-card rounded-2xl transition-all duration-300;
+    @apply bg-card rounded-2xl transition-all duration-300 border border-border/60;
     box-shadow: var(--shadow-card);
   }
   .card-wapm:hover {
@@ -167,6 +183,21 @@
   50% { transform: translateY(8px); }
 }
 
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.85) translateY(16px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.hover-wiggle:hover {
+  animation: wiggle 0.4s ease-in-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -175,31 +206,3 @@
   }
 }
 
-[data-sidebar="sidebar"] {
-  background-color: hsl(264 48% 21%) !important; /* Deep Purple */
-  color: #ffffff !important;
-  border-color: hsl(283 42% 36%) !important;
-}
-
-[data-sidebar="sidebar"] * {
-  color: #ffffff !important;
-}
-
-[data-sidebar="sidebar"] input,
-[data-sidebar="sidebar"] select {
-  background-color: hsl(283 42% 36%) !important;
-  color: #ffffff !important;
-  border-color: hsl(283 42% 36%) !important;
-}
-
-body:has(.admin-shell), 
-main.admin-bg,
-div[class*="admin"] {
-  background-color: hsl(249 100% 96%) !important;
-}
-
-button[class*="white"], 
-.bg-white {
-  background-color: #ffffff !important;
-  color: hsl(264 48% 21%) !important;
-}

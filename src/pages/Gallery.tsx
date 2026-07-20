@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
-import { X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { XIcon, CaretLeftIcon, CaretRightIcon, MagnifyingGlassPlusIcon } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/superbase/client";
 
 type GalleryItem = {
@@ -83,7 +83,7 @@ export default function Gallery() {
           {loading ? (
             <div className="text-center py-20 text-muted-foreground">Loading...</div>
           ) : items.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground">No photos yet — check back soon.</div>
+            <div className="text-center py-20 text-muted-foreground">No photos yet, check back soon.</div>
           ) : (
             <>
               {tabs.length > 1 && (
@@ -118,7 +118,7 @@ export default function Gallery() {
                         loading="lazy"
                       />
                       <div className="absolute inset-0 bg-wapm-deep/0 group-hover:bg-wapm-deep/50 transition-all duration-300 flex items-center justify-center">
-                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <MagnifyingGlassPlusIcon className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" weight="bold" />
                       </div>
                       {item.caption && (
                         <div className="absolute bottom-0 left-0 right-0 p-3 text-white text-sm bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -144,7 +144,7 @@ export default function Gallery() {
             className="absolute top-6 right-6 text-white/80 hover:text-white"
             aria-label="Close"
           >
-            <X className="w-8 h-8" />
+            <XIcon className="w-8 h-8" />
           </button>
           <p className="absolute top-6 left-1/2 -translate-x-1/2 text-white/60 text-sm">
             {lightboxIndex + 1} / {filtered.length}
@@ -154,7 +154,7 @@ export default function Gallery() {
             className="absolute left-4 text-white/80 hover:text-white z-10"
             aria-label="Previous"
           >
-            <ChevronLeft className="w-10 h-10" />
+            <CaretLeftIcon className="w-10 h-10" />
           </button>
           <div
             onClick={(e) => e.stopPropagation()}
@@ -171,7 +171,7 @@ export default function Gallery() {
             className="absolute right-4 text-white/80 hover:text-white z-10"
             aria-label="Next"
           >
-            <ChevronRight className="w-10 h-10" />
+            <CaretRightIcon className="w-10 h-10" />
           </button>
           {filtered[lightboxIndex].caption && (
             <p className="absolute bottom-8 text-white/80 text-sm text-center px-8">

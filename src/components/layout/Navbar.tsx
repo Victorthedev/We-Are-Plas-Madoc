@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import WAPMLogo from "./WAPMLogo";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { ListIcon, XIcon, CaretDownIcon, CarIcon, TreeIcon, CoffeeIcon, PlantIcon, ShoppingCartIcon, BookOpenIcon, UsersIcon } from "@phosphor-icons/react";
 
 const serviceLinks = [
-  { label: "🚗 Community Transport", to: "/services/community-transport" },
-  { label: "🌿 The Land Adventure Playground", to: "/services/the-land" },
-  { label: "☕ Kettle Club", to: "/services/kettle-club" },
-  { label: "🌻 Homegrown", to: "/services/homegrown" },
-  { label: "🛒 Community Pantry", to: "/services/community-pantry" },
-  { label: "📖 About WAPM", to: "/team" },
+  { label: "Community Transport", to: "/services/community-transport", icon: CarIcon },
+  { label: "The Land Adventure Playground", to: "/services/the-land", icon: TreeIcon },
+  { label: "Kettle Club", to: "/services/kettle-club", icon: CoffeeIcon },
+  { label: "Homegrown", to: "/services/homegrown", icon: PlantIcon },
+  { label: "Community Pantry", to: "/services/community-pantry", icon: ShoppingCartIcon },
+  { label: "About WAPM", to: "/team", icon: BookOpenIcon },
 ];
 
 const newsLinks = [
-  { label: "🌻 Homegrown", to: "/news?cat=homegrown" },
-  { label: "🌿 The Land", to: "/news?cat=the-land" },
-  { label: "🛒 Community Pantry", to: "/news?cat=community-pantry" },
-  { label: "👥 Community", to: "/news?cat=community" },
+  { label: "Homegrown", to: "/news?cat=homegrown", icon: PlantIcon },
+  { label: "The Land", to: "/news?cat=the-land", icon: TreeIcon },
+  { label: "Community Pantry", to: "/news?cat=community-pantry", icon: ShoppingCartIcon },
+  { label: "Community", to: "/news?cat=community", icon: UsersIcon },
 ];
 
 const navLinks = [
@@ -60,9 +60,11 @@ export default function Navbar() {
       <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${navBg} ${navShadow}`}>
         <div className="container mx-auto flex items-center justify-between py-4">
           <Link to="/" className="flex items-center gap-2">
-            <WAPMLogo size={40} white={!scrolled} />
+            <span className="hover-wiggle inline-flex">
+              <WAPMLogo size={40} white={!scrolled} />
+            </span>
             <div className={`${textClass} transition-colors duration-300`}>
-              <span className="font-bold text-lg leading-none block">wapm</span>
+              <span className="font-display font-bold text-lg leading-none block">wapm</span>
               <span className="text-xs leading-none opacity-70">we are plas madoc</span>
             </div>
           </Link>
@@ -84,7 +86,7 @@ export default function Navbar() {
                   }`}
                 >
                   {link.label}
-                  {link.dropdown && <ChevronDown className="w-3 h-3" />}
+                  {link.dropdown && <CaretDownIcon className="w-3 h-3" />}
                 </Link>
                 {link.dropdown && openDropdown === link.label && (
                   <div className="absolute top-full left-0 pt-2 min-w-[280px]">
@@ -93,8 +95,9 @@ export default function Navbar() {
                         <Link
                           key={item.to}
                           to={item.to}
-                          className="block px-4 py-3 rounded-xl text-sm text-foreground hover:bg-wapm-lavender transition-colors duration-150"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-foreground hover:bg-wapm-lavender transition-colors duration-150"
                         >
+                          <item.icon className="w-4 h-4 text-primary" weight="duotone" />
                           {item.label}
                         </Link>
                       ))}
@@ -110,7 +113,7 @@ export default function Navbar() {
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileOpen ? <XIcon className="w-6 h-6" /> : <ListIcon className="w-6 h-6" />}
           </button>
         </div>
       </nav>
@@ -121,7 +124,7 @@ export default function Navbar() {
             <Link
               key={link.label}
               to={link.to}
-              className="text-primary-foreground text-3xl font-semibold opacity-0"
+              className="text-primary-foreground text-3xl font-display font-semibold opacity-0"
               style={{ animation: `fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${i * 0.1}s forwards` }}
             >
               {link.label}

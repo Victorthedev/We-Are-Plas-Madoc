@@ -3,6 +3,7 @@ import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/superbase/client";
+import { HeartIcon, HandshakeIcon, BooksIcon, StarIcon, CheckCircleIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 type VolunteerPosition = {
   id: string;
@@ -83,28 +84,32 @@ export default function GetInvolved() {
               <h2 className="text-3xl font-bold text-foreground mb-8">Why Volunteer With WAPM?</h2>
               <div className="space-y-4 mb-8">
                 {[
-                  { icon: "💜", text: "Make a real difference in your local community" },
-                  { icon: "🤝", text: "Meet amazing people and build friendships" },
-                  { icon: "📚", text: "Gain valuable skills and experience" },
-                  { icon: "⭐", text: "Flexible commitment — give as much time as you can" },
+                  { icon: HeartIcon, text: "Make a real difference in your local community" },
+                  { icon: HandshakeIcon, text: "Meet amazing people and build friendships" },
+                  { icon: BooksIcon, text: "Gain valuable skills and experience" },
+                  { icon: StarIcon, text: "Flexible commitment, give as much time as you can" },
                 ].map((b) => (
                   <div key={b.text} className="flex items-start gap-3">
-                    <span className="text-2xl">{b.icon}</span>
-                    <p className="text-muted-foreground">{b.text}</p>
+                    <span className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <b.icon className="w-5 h-5" weight="duotone" />
+                    </span>
+                    <p className="text-muted-foreground pt-1.5">{b.text}</p>
                   </div>
                 ))}
               </div>
               <blockquote className="relative border-l-4 border-primary pl-6 py-2">
                 <span className="text-6xl text-primary/20 absolute -top-4 -left-2 font-serif leading-none">"</span>
                 <p className="text-foreground italic">Volunteering with WAPM has been the best thing I've ever done for my local area.</p>
-                <footer className="text-sm text-muted-foreground mt-2">— Community Volunteer</footer>
+                <footer className="text-sm text-muted-foreground mt-2">Community Volunteer</footer>
               </blockquote>
             </AnimatedSection>
             <AnimatedSection delay={0.2}>
               <div className="card-wapm p-8">
                 {submitted ? (
                   <div className="text-center py-12">
-                    <div className="text-6xl mb-4">✅</div>
+                    <div className="w-16 h-16 rounded-full bg-wapm-green/10 text-wapm-green flex items-center justify-center mx-auto mb-4">
+                      <CheckCircleIcon className="w-9 h-9" weight="duotone" />
+                    </div>
                     <h3 className="text-2xl font-bold text-foreground mb-2">Thank you {form.firstName}!</h3>
                     <p className="text-muted-foreground">We've received your application and will be in touch soon.</p>
                   </div>
@@ -156,7 +161,7 @@ export default function GetInvolved() {
                       </ul>
                     </>
                   )}
-                  <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="btn-outline-primary text-sm">Express Interest →</button>
+                  <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="btn-outline-primary text-sm inline-flex items-center gap-1.5">Express Interest <ArrowRightIcon className="w-3.5 h-3.5" weight="bold" /></button>
                 </div>
               </AnimatedSection>
             ))}

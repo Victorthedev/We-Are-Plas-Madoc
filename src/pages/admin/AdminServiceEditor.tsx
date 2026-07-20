@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeftIcon, FloppyDiskIcon } from "@phosphor-icons/react";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 
@@ -62,15 +62,15 @@ export default function AdminServiceEditor() {
 
   return (
     <AdminShell title={`Edit: ${name}`} breadcrumb="Dashboard > Services > Edit">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" onClick={() => navigate("/admin/services")} className="text-wapm-purple"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
+        <Button variant="ghost" onClick={() => navigate("/admin/services")} className="text-primary"><ArrowLeftIcon className="w-4 h-4 mr-1" /> Back</Button>
         <div className="flex-1" />
-        <Button onClick={save} disabled={saving} className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white"><Save className="w-4 h-4 mr-1" /> Save Changes</Button>
+        <Button onClick={save} disabled={saving} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"><FloppyDiskIcon className="w-4 h-4 mr-1" /> Save Changes</Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <Card className="rounded-2xl border-wapm-purple/[0.12]">
+          <Card className="rounded-2xl border-admin-border">
             <CardContent className="p-6 space-y-4">
               <div><Label>Service Name</Label><Input value={name} disabled className="rounded-[10px] mt-1 bg-muted" /></div>
               <div><Label>Short Description</Label><Textarea value={description} onChange={e => setDescription(e.target.value)} className="rounded-xl mt-1" rows={3} /></div>
@@ -83,7 +83,7 @@ export default function AdminServiceEditor() {
           </Card>
         </div>
         <div className="space-y-4">
-          <Card className="rounded-2xl border-wapm-purple/[0.12]">
+          <Card className="rounded-2xl border-admin-border">
             <CardContent className="p-6 space-y-4">
               <div><Label>Opening Hours</Label><Input value={openingHours} onChange={e => setOpeningHours(e.target.value)} className="rounded-[10px] mt-1" /></div>
               <div><Label>How to Access</Label><Textarea value={howToAccess} onChange={e => setHowToAccess(e.target.value)} className="rounded-xl mt-1" rows={3} /></div>

@@ -1,35 +1,34 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  LayoutDashboard, Newspaper, CalendarDays, Image, Users, MessageSquare,
-  Briefcase, UserCog, Settings, LogOut, ChevronLeft, ChevronRight, Handshake, ClipboardList, BarChart2
-} from "lucide-react";
-import { useState } from "react";
+  SquaresFourIcon, NewspaperIcon, CalendarBlankIcon, ImageIcon, UsersIcon, ChatCircleIcon,
+  BriefcaseIcon, UserGearIcon, GearIcon, SignOutIcon, CaretLeftIcon, CaretRightIcon, HandshakeIcon, ClipboardTextIcon, ChartBarIcon
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Overview", path: "/admin", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
-  { icon: Newspaper, label: "News", path: "/admin/news", roles: ["super_admin", "editor", "contributor"] },
-  { icon: CalendarDays, label: "Events", path: "/admin/events", roles: ["super_admin", "editor", "contributor"] },
-  { icon: Image, label: "Gallery", path: "/admin/gallery", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
-  { icon: Handshake, label: "Volunteers", path: "/admin/volunteers", roles: ["super_admin", "editor"] },
-  { icon: ClipboardList, label: "Vol. Positions", path: "/admin/volunteer-positions", roles: ["super_admin", "editor"] },
-  { icon: MessageSquare, label: "Messages", path: "/admin/messages", roles: ["super_admin", "editor"] },
-  { icon: BarChart2, label: "Analytics", path: "/admin/analytics", roles: ["super_admin", "editor"] },
-  { icon: Briefcase, label: "Services", path: "/admin/services", roles: ["super_admin", "editor"] },
-  { icon: Users, label: "Team", path: "/admin/team", roles: ["super_admin", "editor"] },
+  { icon: SquaresFourIcon, label: "Overview", path: "/admin", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
+  { icon: NewspaperIcon, label: "News", path: "/admin/news", roles: ["super_admin", "editor", "contributor"] },
+  { icon: CalendarBlankIcon, label: "Events", path: "/admin/events", roles: ["super_admin", "editor", "contributor"] },
+  { icon: ImageIcon, label: "Gallery", path: "/admin/gallery", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
+  { icon: HandshakeIcon, label: "Volunteers", path: "/admin/volunteers", roles: ["super_admin", "editor"] },
+  { icon: ClipboardTextIcon, label: "Vol. Positions", path: "/admin/volunteer-positions", roles: ["super_admin", "editor"] },
+  { icon: ChatCircleIcon, label: "Messages", path: "/admin/messages", roles: ["super_admin", "editor"] },
+  { icon: ChartBarIcon, label: "Analytics", path: "/admin/analytics", roles: ["super_admin", "editor"] },
+  { icon: BriefcaseIcon, label: "Services", path: "/admin/services", roles: ["super_admin", "editor"] },
+  { icon: UsersIcon, label: "Team", path: "/admin/team", roles: ["super_admin", "editor"] },
 ];
 
 const bottomItems = [
-  { icon: UserCog, label: "Staff Accounts", path: "/admin/staff", roles: ["super_admin"] },
-  { icon: Settings, label: "Settings", path: "/admin/settings", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
+  { icon: UserGearIcon, label: "Staff Accounts", path: "/admin/staff", roles: ["super_admin"] },
+  { icon: GearIcon, label: "Settings", path: "/admin/settings", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
 ];
 
 const roleBadge: Record<string, { label: string; className: string }> = {
-  super_admin: { label: "Super Admin", className: "bg-wapm-deep text-white" },
-  editor: { label: "Editor", className: "bg-wapm-purple text-white" },
-  contributor: { label: "Contributor", className: "bg-wapm-cyan text-white" },
-  gallery_only: { label: "Gallery", className: "bg-wapm-pink text-white" },
+  super_admin: { label: "Super Admin", className: "bg-primary/20 text-white" },
+  editor: { label: "Editor", className: "bg-accent/20 text-white" },
+  contributor: { label: "Contributor", className: "bg-wapm-green/20 text-white" },
+  gallery_only: { label: "Gallery", className: "bg-wapm-pink/20 text-white" },
 };
 
 export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
@@ -47,10 +46,10 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
         <Link
           to={item.path}
           className={cn(
-            "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+            "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 border-l-[3px]",
             active
-            ? "bg-wapm-purple text-white border-l-[3px] border-wapm-cyan"
-            : "text-white/70 hover:text-white hover:bg-white/10",
+              ? "bg-white/[0.07] text-white border-primary"
+              : "text-white/60 hover:text-white hover:bg-white/[0.04] border-transparent",
             collapsed && "justify-center px-2"
           )}
           title={collapsed ? item.label : undefined}
@@ -65,36 +64,36 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-screen bg-wapm-deep flex flex-col z-50 transition-all duration-300 shadow-[4px_0_20px_rgba(0,0,0,0.15)]",
+        "font-admin fixed left-0 top-0 h-screen bg-admin-chrome flex flex-col z-50 transition-all duration-300",
         collapsed ? "w-[72px]" : "w-[260px]"
       )}
     >
       {/* Logo */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+      <div className="flex items-center justify-between p-4 border-b border-admin-chrome-border">
         <Link to="/admin" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-wapm-purple flex items-center justify-center text-white font-bold text-sm">W</div>
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm">W</div>
           {!collapsed && <span className="text-white font-semibold text-sm">WAPM Admin</span>}
         </Link>
         <button
           onClick={onToggle}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.06] transition-all"
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? <CaretRightIcon className="w-4 h-4" /> : <CaretLeftIcon className="w-4 h-4" />}
         </button>
       </div>
 
       {/* Nav items */}
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-2">{navItems.map(renderItem)}</ul>
-        <div className="border-t border-white/10 my-4 mx-4" />
+        <div className="border-t border-admin-chrome-border my-4 mx-4" />
         <ul className="space-y-1 px-2">{bottomItems.map(renderItem)}</ul>
       </nav>
 
       {/* User */}
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-admin-chrome-border p-4">
         <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="w-9 h-9 rounded-full bg-wapm-purple/40 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white text-xs font-bold shrink-0">
             {profile?.full_name?.charAt(0) || "?"}
           </div>
           {!collapsed && (
@@ -111,11 +110,11 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
         <button
           onClick={signOut}
           className={cn(
-            "flex items-center gap-2 mt-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-red-500/20 transition-all",
+            "flex items-center gap-2 mt-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-destructive/20 transition-all",
             collapsed && "justify-center px-2"
           )}
         >
-          <LogOut className="w-4 h-4 shrink-0" />
+          <SignOutIcon className="w-4 h-4 shrink-0" />
           {!collapsed && <span>Log out</span>}
         </button>
       </div>

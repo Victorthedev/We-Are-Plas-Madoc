@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import WAPMLogo from "./WAPMLogo";
 import DotPattern from "@/components/ui/DotPattern";
+import { PhoneIcon, DeviceMobileIcon, EnvelopeIcon, MapPinIcon } from "@phosphor-icons/react";
 
 const quickLinks = [
   { label: "Home", to: "/" },
@@ -28,7 +29,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <WAPMLogo size={36} white />
-              <span className="font-bold text-lg">wapm</span>
+              <span className="font-display font-bold text-lg">wapm</span>
             </div>
             <p className="text-sm opacity-80 mb-4 leading-relaxed">Building a stronger community together in Plas Madoc, Wrexham</p>
             <p className="text-xs opacity-60 mb-4">Charity Number: 1197278</p>
@@ -56,10 +57,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-base mb-4">Contact</h4>
             <ul className="space-y-3 text-sm opacity-80">
-              <li>📞 <a href="tel:01978813912" className="hover:opacity-100">01978 813912</a></li>
-              <li>📱 <a href="tel:07423503836" className="hover:opacity-100">07423503836 (Transport)</a></li>
-              <li>✉️ <a href="mailto:weareplasmadoc@avow.org" className="hover:opacity-100">weareplasmadoc@avow.org</a></li>
-              <li>📍 The Opportunities Centre, Plas Madoc, LL14 3US</li>
+              <li className="flex items-center gap-2"><PhoneIcon className="w-4 h-4 shrink-0" weight="duotone" /> <a href="tel:01978813912" className="hover:opacity-100">01978 813912</a></li>
+              <li className="flex items-center gap-2"><DeviceMobileIcon className="w-4 h-4 shrink-0" weight="duotone" /> <a href="tel:07423503836" className="hover:opacity-100">07423503836 (Transport)</a></li>
+              <li className="flex items-center gap-2"><EnvelopeIcon className="w-4 h-4 shrink-0" weight="duotone" /> <a href="mailto:weareplasmadoc@avow.org" className="hover:opacity-100">weareplasmadoc@avow.org</a></li>
+              <li className="flex items-center gap-2"><MapPinIcon className="w-4 h-4 shrink-0" weight="duotone" /> The Opportunities Centre, Plas Madoc, LL14 3US</li>
             </ul>
           </div>
         </div>

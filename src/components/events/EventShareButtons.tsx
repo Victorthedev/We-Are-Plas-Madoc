@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link2, Check } from "lucide-react";
+import { LinkSimpleIcon, CheckIcon, FacebookLogoIcon, XLogoIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
 
 interface EventShareButtonsProps {
   eventName: string;
@@ -14,17 +14,20 @@ export default function EventShareButtons({ eventName, eventUrl }: EventShareBut
 
   const shareLinks = [
     {
-      label: "f Facebook",
+      label: "Facebook",
+      icon: FacebookLogoIcon,
       href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       hoverColor: "hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2]",
     },
     {
-      label: "𝕏 Twitter",
+      label: "Twitter",
+      icon: XLogoIcon,
       href: `https://twitter.com/intent/tweet?text=${encodedName}&url=${encodedUrl}&via=WePlas`,
       hoverColor: "hover:bg-foreground hover:text-background hover:border-foreground",
     },
     {
-      label: "💬 WhatsApp",
+      label: "WhatsApp",
+      icon: WhatsappLogoIcon,
       href: `https://wa.me/?text=${encodedName}%20-%20${encodedUrl}`,
       hoverColor: "hover:bg-[#25D366] hover:text-white hover:border-[#25D366]",
     },
@@ -61,7 +64,7 @@ export default function EventShareButtons({ eventName, eventUrl }: EventShareBut
           onClick={() => openPopup(link.href)}
           className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-border text-xs font-medium text-muted-foreground transition-all duration-200 ${link.hoverColor}`}
         >
-          {link.label}
+          <link.icon className="w-3.5 h-3.5" weight="fill" /> {link.label}
         </button>
       ))}
       <button
@@ -72,7 +75,7 @@ export default function EventShareButtons({ eventName, eventUrl }: EventShareBut
             : "border-border text-muted-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
         }`}
       >
-        {copied ? <><Check className="w-3 h-3" /> Copied!</> : <><Link2 className="w-3 h-3" /> Copy Link</>}
+        {copied ? <><CheckIcon className="w-3 h-3" weight="bold" /> Copied!</> : <><LinkSimpleIcon className="w-3 h-3" weight="bold" /> Copy Link</>}
       </button>
     </div>
   );

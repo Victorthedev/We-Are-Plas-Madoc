@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { supabase } from "@/integrations/superbase/client";
+import { UserCircleIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 type TeamMember = {
   id: string;
@@ -45,11 +46,13 @@ export default function Team() {
               {staff.map((person, i) => (
                 <AnimatedSection key={person.id} delay={i * 0.1}>
                   <div className="card-wapm p-8 text-center group">
-                    <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 mb-6 group-hover:ring-4 group-hover:ring-primary/30 transition-all duration-300">
+                    <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-primary/10 mb-6 group-hover:ring-4 group-hover:ring-primary/30 transition-all duration-300">
                       {person.photo_url ? (
                         <img src={person.photo_url} alt={person.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl">👤</div>
+                        <div className="w-full h-full flex items-center justify-center text-primary/40">
+                          <UserCircleIcon className="w-16 h-16" weight="duotone" />
+                        </div>
                       )}
                     </div>
                     <h3 className="text-lg font-semibold text-foreground">{person.name}</h3>
@@ -60,9 +63,9 @@ export default function Team() {
                         href={person.social_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-primary hover:text-accent transition-colors mt-3 inline-block"
+                        className="group/link text-xs text-primary hover:text-accent transition-colors mt-3 inline-flex items-center gap-1"
                       >
-                        Connect →
+                        Connect <ArrowRightIcon className="w-3 h-3 transition-transform group-hover/link:translate-x-0.5" weight="bold" />
                       </a>
                     )}
                   </div>
@@ -83,11 +86,13 @@ export default function Team() {
               {trustees.map((person, i) => (
                 <AnimatedSection key={person.id} delay={i * 0.05}>
                   <div className="card-wapm p-6 text-center">
-                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-gradient-to-br from-primary/15 to-accent/15 mb-4">
+                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden bg-primary/10 mb-4">
                       {person.photo_url ? (
                         <img src={person.photo_url} alt={person.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-2xl">👤</div>
+                        <div className="w-full h-full flex items-center justify-center text-primary/40">
+                          <UserCircleIcon className="w-10 h-10" weight="duotone" />
+                        </div>
                       )}
                     </div>
                     <p className="font-semibold text-foreground text-sm">{person.name}</p>

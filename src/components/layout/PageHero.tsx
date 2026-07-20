@@ -13,8 +13,10 @@ interface Props {
 
 export default function PageHero({ title, breadcrumbs }: Props) {
   return (
-    <section className="relative min-h-[40vh] flex items-center justify-center bg-gradient-to-br from-wapm-deep to-primary overflow-hidden">
+    <section className="relative min-h-[40vh] flex items-center justify-center bg-wapm-deep overflow-hidden">
       <DotPattern opacity={0.08} />
+      <div className="absolute -top-20 -right-20 w-[320px] h-[320px] rounded-full bg-wapm-pink/20 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -left-16 w-[280px] h-[280px] rounded-full bg-accent/20 blur-3xl pointer-events-none" />
       <div className="relative z-10 text-center px-4 pt-24 pb-16">
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4">{title}</h1>
         {breadcrumbs && (
@@ -27,11 +29,6 @@ export default function PageHero({ title, breadcrumbs }: Props) {
             ))}
           </nav>
         )}
-      </div>
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 80" fill="none" className="w-full block">
-          <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="hsl(249, 100%, 98%)" />
-        </svg>
       </div>
     </section>
   );

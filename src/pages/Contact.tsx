@@ -4,10 +4,11 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { toast } from "sonner";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/superbase/client";
+import { PhoneIcon, EnvelopeIcon, MapPinIcon, CheckCircleIcon, FacebookLogoIcon, XLogoIcon } from "@phosphor-icons/react";
 
 const faqs = [
   { q: "How do I book a community transport journey?", a: "Call us on 01978 813912 or 07423503836 to book. We'll arrange a volunteer driver for your date and time." },
-  { q: "Is the Kettle Club free to attend?", a: "Yes! The Kettle Club is completely free and open to all Plas Madoc residents. Just turn up — no booking needed." },
+  { q: "Is the Kettle Club free to attend?", a: "Yes! The Kettle Club is completely free and open to all Plas Madoc residents. Just turn up, no booking needed." },
   { q: "Does the Community Pantry require a referral?", a: "No referral is needed. The Community Pantry is open to all residents in Plas Madoc and the surrounding areas. Everyone is welcome." },
   { q: "Can I volunteer even if I have limited time?", a: "Absolutely. We have flexible volunteering options to suit your availability." },
   { q: "How is WAPM funded?", a: "WAPM is a registered CIO charity funded through grants, donations, and community fundraising." },
@@ -70,10 +71,10 @@ export default function Contact() {
                     <div key={person.name}>
                       <p className="font-semibold text-foreground text-sm">{person.name}</p>
                       <p className="text-xs text-muted-foreground mb-1">{person.role}</p>
-                      <a href={`tel:${person.phone.replace(/\s/g, "")}`} className="text-sm text-primary hover:text-accent transition-colors">📞 {person.phone}</a>
+                      <a href={`tel:${person.phone.replace(/\s/g, "")}`} className="text-sm text-primary hover:text-accent transition-colors inline-flex items-center gap-1.5"><PhoneIcon className="w-4 h-4" weight="duotone" /> {person.phone}</a>
                     </div>
                   ))}
-                  <a href="mailto:weareplasmadoc@avow.org" className="text-sm text-primary hover:text-accent transition-colors block">✉️ weareplasmadoc@avow.org</a>
+                  <a href="mailto:weareplasmadoc@avow.org" className="text-sm text-primary hover:text-accent transition-colors flex items-center gap-1.5"><EnvelopeIcon className="w-4 h-4" weight="duotone" /> weareplasmadoc@avow.org</a>
                 </div>
               </div>
             </AnimatedSection>
@@ -83,10 +84,10 @@ export default function Contact() {
                 <div className="rounded-xl overflow-hidden mb-4 h-[250px]">
                   <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4800!2d-3.155!3d52.995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zUGxhcyBNYWRvYw!5e0!3m2!1sen!2suk!4v1" className="w-full h-full border-0" allowFullScreen loading="lazy" title="WAPM Location" />
                 </div>
-                <p className="text-sm text-muted-foreground">📍 The Opportunities Centre, Plas Madoc, Wrexham, LL14 3US</p>
+                <p className="text-sm text-muted-foreground flex items-center gap-1.5"><MapPinIcon className="w-4 h-4 shrink-0" weight="duotone" /> The Opportunities Centre, Plas Madoc, Wrexham, LL14 3US</p>
                 <div className="flex gap-3 mt-4">
-                  <a href="https://facebook.com/WeArePlasMadoc" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all font-bold">f</a>
-                  <a href="https://twitter.com/WePlas" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all font-bold">𝕏</a>
+                  <a href="https://facebook.com/WeArePlasMadoc" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all"><FacebookLogoIcon className="w-5 h-5" weight="fill" /></a>
+                  <a href="https://twitter.com/WePlas" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all"><XLogoIcon className="w-5 h-5" weight="fill" /></a>
                 </div>
               </div>
             </AnimatedSection>
@@ -94,7 +95,13 @@ export default function Contact() {
               <div className="card-wapm p-8 bg-secondary/30 h-full">
                 <h3 className="text-xl font-semibold text-foreground mb-6">Send a Message</h3>
                 {sent ? (
-                  <div className="text-center py-8"><div className="text-5xl mb-3">✅</div><p className="text-foreground font-semibold">Message sent!</p><p className="text-sm text-muted-foreground">We'll get back to you within 2 working days.</p></div>
+                  <div className="text-center py-8">
+                    <div className="w-14 h-14 rounded-full bg-wapm-green/10 text-wapm-green flex items-center justify-center mx-auto mb-3">
+                      <CheckCircleIcon className="w-8 h-8" weight="duotone" />
+                    </div>
+                    <p className="text-foreground font-semibold">Message sent!</p>
+                    <p className="text-sm text-muted-foreground">We'll get back to you within 2 working days.</p>
+                  </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div><input placeholder="Name *" value={form.name} onChange={e => update("name", e.target.value)} className={inputCls("name")} />{errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}</div>

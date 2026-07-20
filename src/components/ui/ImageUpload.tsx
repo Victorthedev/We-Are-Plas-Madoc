@@ -102,7 +102,7 @@ export default function ImageUpload({ value, onChange, folder = "general", class
                 <Upload className="w-6 h-6 text-primary" />
               </div>
               <p className="text-sm font-medium text-foreground">Click to upload or drag and drop</p>
-              <p className="text-xs">PNG, JPG, WebP — max 5MB</p>
+              <p className="text-xs">PNG, JPG, WebP, max 5MB</p>
             </div>
           )}
         </div>

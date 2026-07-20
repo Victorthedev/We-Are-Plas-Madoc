@@ -1,19 +1,22 @@
 import WAPMLogo from "@/components/layout/WAPMLogo";
 import DotPattern from "@/components/ui/DotPattern";
 import { Link } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import { CaretDownIcon, ArrowRightIcon } from "@phosphor-icons/react";
+import WelshFlagIcon from "@/components/icons/WelshFlagIcon";
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center bg-gradient-to-br from-wapm-deep to-primary overflow-hidden">
+    <section className="relative min-h-screen flex items-center bg-wapm-deep overflow-hidden">
       <DotPattern opacity={0.08} />
+      <div className="absolute -top-24 -right-24 w-[420px] h-[420px] rounded-full bg-wapm-pink/20 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[360px] h-[360px] rounded-full bg-accent/20 blur-3xl pointer-events-none" />
       <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center gap-12 pt-24 pb-16">
         <div className="flex-1 text-center lg:text-left">
           <div
             className="pill-badge-cyan mb-6 inline-flex opacity-0"
             style={{ animation: "fade-in-up 0.6s 0.3s forwards" }}
           >
-            🏴󠁧󠁢󠁷󠁬󠁳󠁿 Serving Plas Madoc, Wrexham
+            <WelshFlagIcon className="w-5 h-4 rounded-sm" /> Serving Plas Madoc, Wrexham
           </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-primary-foreground leading-[1.1] tracking-[-0.03em] mb-6">
             <span className="block opacity-0" style={{ animation: "fade-in-up 0.6s 0.4s forwards" }}>
@@ -34,13 +37,13 @@ export default function HeroSection() {
             style={{ animation: "fade-in-up 0.6s 0.9s forwards" }}
           >
             <Link to="/services" className="btn-hero-filled">Explore Our Services</Link>
-            <Link to="/get-involved" className="btn-hero-outline">Get Involved →</Link>
+            <Link to="/get-involved" className="btn-hero-outline inline-flex items-center gap-1.5">Get Involved <ArrowRightIcon className="w-4 h-4" weight="bold" /></Link>
           </div>
           <div
             className="mt-12 text-primary-foreground/60 text-xs flex items-center gap-2 justify-center lg:justify-start opacity-0"
             style={{ animation: "fade-in-up 0.6s 1.1s forwards" }}
           >
-            Scroll to discover <ChevronDown className="w-4 h-4 animate-bounce-down" />
+            Scroll to discover <CaretDownIcon className="w-4 h-4 animate-bounce-down" />
           </div>
         </div>
         <div

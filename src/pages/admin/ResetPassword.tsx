@@ -25,9 +25,9 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-wapm-lavender flex items-center justify-center p-8">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold text-wapm-deep-purple mb-1">Set New Password</h1>
+    <div className="font-admin min-h-screen bg-admin-surface flex items-center justify-center p-4 sm:p-8">
+      <div className="w-full max-w-sm bg-card rounded-2xl shadow-lg p-6 sm:p-8">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Set New Password</h1>
         <p className="text-muted-foreground text-sm mb-6">Enter your new password below.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -38,7 +38,7 @@ export default function ResetPassword() {
             <Label htmlFor="confirm">Confirm Password</Label>
             <Input id="confirm" type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} className="rounded-[10px] mt-1" />
           </div>
-          <Button type="submit" disabled={submitting} className="w-full h-12 rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white font-semibold">
+          <Button type="submit" disabled={submitting} className="w-full h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
             {submitting ? "Updating..." : "Update Password"}
           </Button>
         </form>

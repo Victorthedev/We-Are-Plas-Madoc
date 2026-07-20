@@ -10,9 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Save, Send } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ArrowLeftIcon, FloppyDiskIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import ImageUpload from "@/components/ui/ImageUpload";
+
+const MAX_RECURRENCE_INSTANCES = 104; // 2 years of weekly events, a sane upper bound
 
 export default function AdminEventEditor() {
   const { id } = useParams();
@@ -36,6 +39,16 @@ export default function AdminEventEditor() {
   const [recurrenceUntil, setRecurrenceUntil] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [initialSnapshot, setInitialSnapshot] = useState("");
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [pendingRecurrence, setPendingRecurrence] = useState<{ count: number; newStatus?: string } | null>(null);
+
+  const snapshot = () => JSON.stringify({
+    title, description, startDate, startTime, endDate, endTime, location, eventType,
+    posterUrl, isFree, externalLink, status, recurrenceRule, recurrenceUntil,
+  });
+  const isDirty = initialSnapshot !== "" && snapshot() !== initialSnapshot;
+
   useEffect(() => {
     if (!isNew && id) {
       supabase.from("events").select("*").eq("id", id).single().then(({ data }) => {
@@ -58,13 +71,66 @@ export default function AdminEventEditor() {
           setStatus(data.status);
           setRecurrenceRule(data.recurrence_rule || "none");
           setRecurrenceUntil(data.recurrence_until || "");
+          // Snapshot taken after next render, once state above has committed
+          requestAnimationFrame(() => setInitialSnapshot(JSON.stringify({
+            title: data.title, description: data.description || "",
+            startDate: s.toISOString().split("T")[0], startTime: s.toTimeString().slice(0, 5),
+            endDate: data.end_datetime ? new Date(data.end_datetime).toISOString().split("T")[0] : "",
+            endTime: data.end_datetime ? new Date(data.end_datetime).toTimeString().slice(0, 5) : "",
+            location: data.location || "", eventType: data.event_type || "",
+            posterUrl: data.poster_image_url || "", isFree: data.is_free ?? true,
+            externalLink: data.external_link || "", status: data.status,
+            recurrenceRule: data.recurrence_rule || "none", recurrenceUntil: data.recurrence_until || "",
+          })));
         }
       });
+    } else {
+      setInitialSnapshot(snapshot());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // Warn on tab close / refresh / external navigation if there are unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) { e.preventDefault(); e.returnValue = ""; }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  const goBack = () => {
+    if (isDirty) setShowDiscardConfirm(true);
+    else navigate("/admin/events");
+  };
+
+  const countRecurrenceInstances = () => {
+    if (recurrenceRule === "none" || !recurrenceUntil || !startDate) return 0;
+    const untilDate = new Date(recurrenceUntil);
+    const stepDays = recurrenceRule === "weekly" ? 7 : recurrenceRule === "fortnightly" ? 14 : 30;
+    let count = 0;
+    let cursor = new Date(`${startDate}T${startTime || "00:00"}`);
+    cursor.setDate(cursor.getDate() + stepDays);
+    while (cursor <= untilDate && count < MAX_RECURRENCE_INSTANCES + 1) {
+      count++;
+      cursor = new Date(cursor);
+      cursor.setDate(cursor.getDate() + stepDays);
+    }
+    return count;
+  };
 
   const save = async (newStatus?: string) => {
     if (!title.trim() || !startDate) { toast.error("Title and start date required"); return; }
+
+    // Recurring + new event: confirm the number of instances before committing
+    if (isNew && recurrenceRule !== "none" && recurrenceUntil && !pendingRecurrence) {
+      const count = countRecurrenceInstances();
+      if (count > 0) {
+        setPendingRecurrence({ count, newStatus });
+        return;
+      }
+    }
+
     setSaving(true);
     const finalStatus = newStatus || status;
     const startDatetime = new Date(`${startDate}T${startTime || "00:00"}`).toISOString();
@@ -86,14 +152,13 @@ export default function AdminEventEditor() {
       const { data: inserted, error: insertErr } = await supabase.from("events").insert(basePayload).select("id").single();
       error = insertErr;
 
-      // Generate recurrence instances after the parent is created
       if (!insertErr && inserted && recurrenceRule !== "none" && recurrenceUntil) {
         const untilDate = new Date(recurrenceUntil);
         const stepDays = recurrenceRule === "weekly" ? 7 : recurrenceRule === "fortnightly" ? 14 : 30;
         const instances = [];
         let cursor = new Date(startDatetime);
         cursor.setDate(cursor.getDate() + stepDays);
-        while (cursor <= untilDate) {
+        while (cursor <= untilDate && instances.length < MAX_RECURRENCE_INSTANCES) {
           const instanceStart = cursor.toISOString();
           const instanceEnd = durationMs ? new Date(cursor.getTime() + durationMs).toISOString() : null;
           instances.push({
@@ -121,25 +186,27 @@ export default function AdminEventEditor() {
         content_type: "event", content_title: title,
       });
       toast.success("Saved!");
+      setInitialSnapshot(snapshot());
       navigate("/admin/events");
     }
     setSaving(false);
+    setPendingRecurrence(null);
   };
 
   return (
     <AdminShell title={isNew ? "New Event" : "Edit Event"} breadcrumb={`Dashboard > Events > ${isNew ? "New" : "Edit"}`}>
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" onClick={() => navigate("/admin/events")} className="text-wapm-purple"><ArrowLeft className="w-4 h-4 mr-1" /> Back</Button>
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
+        <Button variant="ghost" onClick={goBack} className="text-primary"><ArrowLeftIcon className="w-4 h-4 mr-1" /> Back</Button>
         <div className="flex-1" />
-        <Button variant="outline" onClick={() => save("draft")} disabled={saving} className="rounded-full border-wapm-purple/20 text-wapm-purple"><Save className="w-4 h-4 mr-1" /> Save Draft</Button>
+        <Button variant="outline" onClick={() => save("draft")} disabled={saving} className="rounded-full border-primary/20 text-primary"><FloppyDiskIcon className="w-4 h-4 mr-1" /> Save Draft</Button>
         {hasPermission(["super_admin", "editor"]) && (
-          <Button onClick={() => save("published")} disabled={saving} className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white"><Send className="w-4 h-4 mr-1" /> Publish</Button>
+          <Button onClick={() => save("published")} disabled={saving} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"><PaperPlaneTiltIcon className="w-4 h-4 mr-1" /> Publish</Button>
         )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <Card className="rounded-2xl border-wapm-purple/[0.12]">
+          <Card className="rounded-2xl border-admin-border">
             <CardContent className="p-6 space-y-4">
               <div>
                 <Label>Event Name *</Label>
@@ -149,7 +216,7 @@ export default function AdminEventEditor() {
                 <Label>Description</Label>
                 <Textarea value={description} onChange={e => setDescription(e.target.value)} className="rounded-xl mt-1 min-h-[200px]" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Start Date *</Label><Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="rounded-[10px] mt-1" /></div>
                 <div><Label>Start Time</Label><Input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} className="rounded-[10px] mt-1" /></div>
                 <div><Label>End Date</Label><Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="rounded-[10px] mt-1" /></div>
@@ -161,7 +228,7 @@ export default function AdminEventEditor() {
         </div>
 
         <div className="space-y-4">
-          <Card className="rounded-2xl border-wapm-purple/[0.12]">
+          <Card className="rounded-2xl border-admin-border">
             <CardContent className="p-6 space-y-4">
               <div>
                 <Label>Event Type</Label>
@@ -207,6 +274,41 @@ export default function AdminEventEditor() {
           </Card>
         </div>
       </div>
+
+      {/* Discard changes confirmation */}
+      <Dialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Discard unsaved changes?</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground text-sm">You have unsaved changes to this event. Leaving now will lose them.</p>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowDiscardConfirm(false)} className="rounded-full">Keep Editing</Button>
+            <Button onClick={() => navigate("/admin/events")} className="rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground">Discard & Leave</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recurrence confirmation */}
+      <Dialog open={!!pendingRecurrence} onOpenChange={(o) => !o && setPendingRecurrence(null)}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Confirm recurring event</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground text-sm">
+            This will create <strong>{pendingRecurrence?.count} additional event{pendingRecurrence?.count === 1 ? "" : "s"}</strong>, repeating {recurrenceRule} until {recurrenceUntil && new Date(recurrenceUntil).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}.
+            {pendingRecurrence && pendingRecurrence.count >= MAX_RECURRENCE_INSTANCES && (
+              <> Capped at {MAX_RECURRENCE_INSTANCES} events (about 2 years) to prevent runaway creation.</>
+            )}
+          </p>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setPendingRecurrence(null)} className="rounded-full">Go Back</Button>
+            <Button onClick={() => save(pendingRecurrence?.newStatus)} disabled={saving} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground">
+              {saving ? "Creating..." : "Confirm & Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminShell>
   );
 }

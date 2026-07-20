@@ -3,6 +3,7 @@ import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/superbase/client";
+import { ArrowUpRightIcon } from "@phosphor-icons/react";
 
 type NewsPost = {
   id: string;
@@ -52,7 +53,7 @@ export default function News() {
           {loading ? (
             <div className="text-center py-20 text-muted-foreground">Loading...</div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground">No news posts yet — check back soon.</div>
+            <div className="text-center py-20 text-muted-foreground">No news posts yet, check back soon.</div>
           ) : (
             <>
               <div className="flex flex-wrap gap-2 mb-12 justify-center">
@@ -73,8 +74,11 @@ export default function News() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                 {visible.map((post, i) => (
                   <AnimatedSection key={post.id} delay={i * 0.05}>
-                    <Link to={`/news/${post.slug}`} className="card-wapm block group overflow-hidden h-full">
-                      <div className="relative h-44 bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
+                    <Link to={`/news/${post.slug}`} className="card-wapm relative block group overflow-hidden h-full">
+                      <span className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-card/90 text-primary flex items-center justify-center transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
+                        <ArrowUpRightIcon className="w-4 h-4" weight="bold" />
+                      </span>
+                      <div className="relative h-44 bg-primary/10 overflow-hidden">
                         {post.featured_image_url ? (
                           <img
                             src={post.featured_image_url}
@@ -98,7 +102,6 @@ export default function News() {
                         </p>
                         <h3 className="font-semibold text-foreground mb-2 line-clamp-2">{post.title}</h3>
                         <p className="text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>
-                        <span className="text-primary font-semibold text-sm mt-3 inline-block">Read more →</span>
                       </div>
                     </Link>
                   </AnimatedSection>

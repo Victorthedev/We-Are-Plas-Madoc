@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import PageHero from "@/components/layout/PageHero";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { supabase } from "@/integrations/superbase/client";
+import { ClipboardTextIcon, ClockIcon, InfoIcon } from "@phosphor-icons/react";
+import { serviceIcons } from "@/lib/serviceIcons";
 
 type Service = {
   id: string;
@@ -55,6 +57,7 @@ export default function ServiceDetail() {
   }
 
   const paragraphs = (service.content || service.description || "").split("\n").filter(Boolean);
+  const ServiceIcon = serviceIcons[service.slug] || ClipboardTextIcon;
 
   return (
     <main id="main">
@@ -66,7 +69,9 @@ export default function ServiceDetail() {
         <div className="container mx-auto max-w-4xl">
           <AnimatedSection>
             <div className="flex items-center gap-4 mb-8">
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-4xl">{service.icon || "📋"}</div>
+              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <ServiceIcon className="w-9 h-9" weight="duotone" />
+              </div>
               <h2 className="text-3xl font-bold text-foreground">{service.name}</h2>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -79,10 +84,10 @@ export default function ServiceDetail() {
                 <div className="card-wapm p-6">
                   <h3 className="font-semibold text-foreground mb-4">Key Information</h3>
                   {service.opening_hours && (
-                    <p className="text-sm text-muted-foreground mb-2">🕐 {service.opening_hours}</p>
+                    <p className="text-sm text-muted-foreground mb-2 flex items-start gap-2"><ClockIcon className="w-4 h-4 shrink-0 mt-0.5" weight="duotone" /> {service.opening_hours}</p>
                   )}
                   {service.how_to_access && (
-                    <p className="text-sm text-muted-foreground mb-2">ℹ️ {service.how_to_access}</p>
+                    <p className="text-sm text-muted-foreground mb-2 flex items-start gap-2"><InfoIcon className="w-4 h-4 shrink-0 mt-0.5" weight="duotone" /> {service.how_to_access}</p>
                   )}
                   {service.contact_info && (
                     <p className="text-sm text-muted-foreground mb-4">{service.contact_info}</p>

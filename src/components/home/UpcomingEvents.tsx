@@ -3,6 +3,7 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import DotPattern from "@/components/ui/DotPattern";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/superbase/client";
+import { MapPinIcon, ClockIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 type Event = {
   id: string;
@@ -29,8 +30,9 @@ export default function UpcomingEvents() {
   if (events.length === 0) return null;
 
   return (
-    <section className="relative section-padding bg-gradient-to-br from-primary to-wapm-dark overflow-hidden">
+    <section className="relative section-padding bg-primary overflow-hidden">
       <DotPattern opacity={0.08} />
+      <div className="absolute -bottom-32 -left-16 w-[380px] h-[380px] rounded-full bg-wapm-deep-purple/25 blur-3xl pointer-events-none" />
       <div className="relative z-10 container mx-auto">
         <AnimatedSection className="text-center mb-16">
           <span className="pill-badge bg-primary-foreground/20 text-primary-foreground mb-4 inline-flex">Events</span>
@@ -52,8 +54,11 @@ export default function UpcomingEvents() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-primary-foreground mb-1">{evt.title}</h3>
-                    <p className="text-xs text-primary-foreground/70 mb-1">
-                      {evt.location && `📍 ${evt.location} · `}🕐 {time}
+                    <p className="text-xs text-primary-foreground/70 mb-1 flex items-center flex-wrap gap-x-1.5">
+                      {evt.location && (
+                        <span className="inline-flex items-center gap-1"><MapPinIcon className="w-3 h-3" weight="duotone" /> {evt.location}</span>
+                      )}
+                      <span className="inline-flex items-center gap-1"><ClockIcon className="w-3 h-3" weight="duotone" /> {time}</span>
                     </p>
                     {evt.description && (
                       <p className="text-sm text-primary-foreground/60 line-clamp-2">{evt.description}</p>
@@ -65,7 +70,7 @@ export default function UpcomingEvents() {
           })}
         </div>
         <div className="text-center">
-          <Link to="/events" className="btn-hero-outline">View Full Calendar →</Link>
+          <Link to="/events" className="btn-hero-outline inline-flex items-center gap-1.5">View Full Calendar <ArrowRightIcon className="w-4 h-4" weight="bold" /></Link>
         </div>
       </div>
     </section>

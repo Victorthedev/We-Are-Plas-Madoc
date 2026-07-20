@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "../../integrations/superbase/client";
-import { Check } from "lucide-react";
+import { CheckIcon, ConfettiIcon } from "@phosphor-icons/react";
 
 interface RsvpModalProps {
   open: boolean;
@@ -84,16 +84,16 @@ export default function RsvpModal({ open, onOpenChange, event, onSuccess }: Rsvp
         {success ? (
           <div className="text-center py-6">
             <div className="w-16 h-16 rounded-full bg-wapm-green/10 flex items-center justify-center mx-auto mb-4 animate-in zoom-in-50">
-              <Check className="w-8 h-8 text-wapm-green" />
+              <CheckIcon className="w-8 h-8 text-wapm-green" weight="bold" />
             </div>
-            <h3 className="text-xl font-bold text-foreground mb-2">You're confirmed! 🎉</h3>
+            <h3 className="text-xl font-bold text-foreground mb-2 inline-flex items-center gap-2">You're confirmed! <ConfettiIcon className="w-5 h-5 text-primary" weight="duotone" /></h3>
             <p className="text-sm text-muted-foreground mb-1">We've sent a confirmation to <strong>{form.email}</strong></p>
             <p className="text-sm text-muted-foreground">See you on {formatDate(event.start_datetime)}!</p>
           </div>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="text-xl text-foreground">Indicate your interest 🎉</DialogTitle>
+              <DialogTitle className="text-xl text-foreground inline-flex items-center gap-2">Indicate your interest <ConfettiIcon className="w-5 h-5 text-primary" weight="duotone" /></DialogTitle>
               <p className="text-sm text-muted-foreground mt-1">{event.title}</p>
             </DialogHeader>
 

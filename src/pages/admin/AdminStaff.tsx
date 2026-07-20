@@ -6,15 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, UserCog, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { PlusIcon, UserGearIcon, TrashIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const roleBadge: Record<string, { label: string; className: string }> = {
-  super_admin: { label: "Super Admin", className: "bg-wapm-deep-purple text-white" },
-  editor: { label: "Editor", className: "bg-wapm-purple text-white" },
-  contributor: { label: "Contributor", className: "bg-wapm-cyan text-white" },
+  super_admin: { label: "Super Admin", className: "bg-admin-chrome text-white" },
+  editor: { label: "Editor", className: "bg-primary text-primary-foreground" },
+  contributor: { label: "Contributor", className: "bg-accent text-accent-foreground" },
   gallery_only: { label: "Gallery", className: "bg-wapm-pink text-white" },
 };
 
@@ -28,6 +28,8 @@ export default function AdminStaff() {
   const [inviteName, setInviteName] = useState("");
   const [inviteRole, setInviteRole] = useState("contributor");
   const [inviting, setInviting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetch = async () => {
     setLoading(true);
@@ -44,17 +46,20 @@ export default function AdminStaff() {
     setLoading(false);
   };
 
-  const handleDelete = async (userId: string, name: string) => {
-    if (!confirm(`Permanently delete ${name}'s account? This cannot be undone.`)) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     const { error } = await supabase.functions.invoke("delete-staff", {
-      body: { user_id: userId },
+      body: { user_id: deleteTarget.id },
     });
     if (error) {
       toast.error(error.message || "Failed to delete account");
     } else {
-      toast.success(`${name}'s account has been deleted`);
+      toast.success(`${deleteTarget.name}'s account has been deleted`);
       fetch();
     }
+    setDeleting(false);
+    setDeleteTarget(null);
   };
 
   useEffect(() => { fetch(); }, []);
@@ -70,69 +75,112 @@ export default function AdminStaff() {
   return (
     <AdminShell title="Staff Accounts" breadcrumb="Dashboard > Staff">
       <PermissionGuard roles={["super_admin"]}>
-        <div className="flex justify-between items-center mb-6">
-          <div />
-          <Button onClick={() => setShowInvite(true)} className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white">
-            <Plus className="w-4 h-4 mr-1" /> Invite Staff
+        <div className="flex justify-end mb-6">
+          <Button onClick={() => setShowInvite(true)} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
+            <PlusIcon className="w-4 h-4 mr-1" weight="bold" /> Invite Staff
           </Button>
         </div>
 
-        <Card className="rounded-2xl border-wapm-purple/[0.12] shadow-[0_2px_12px_rgba(45,27,78,0.08)]">
+        <Card className="rounded-2xl border-admin-border shadow-[0_2px_12px_rgba(20,20,30,0.06)]">
           <CardContent className="p-0">
             {loading ? (
               <div className="p-8 text-center text-muted-foreground">Loading...</div>
             ) : profiles.length === 0 ? (
               <div className="p-12 text-center">
-                <UserCog className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-lg font-semibold text-wapm-deep-purple">No staff accounts</p>
+                <UserGearIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-lg font-semibold text-foreground">No staff accounts</p>
               </div>
             ) : (
-              <table className="w-full text-sm">
-                <thead><tr className="border-b border-wapm-purple/[0.08]">
-                  <th className="text-left p-4 font-semibold text-wapm-deep-purple">Name</th>
-                  <th className="text-left p-4 font-semibold text-wapm-deep-purple hidden md:table-cell">Email</th>
-                  <th className="text-left p-4 font-semibold text-wapm-deep-purple">Role</th>
-                  <th className="text-left p-4 font-semibold text-wapm-deep-purple hidden lg:table-cell">Last Active</th>
-                  <th className="p-4" />
-                </tr></thead>
-                <tbody>
+              <>
+                {/* Desktop table, md and up */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead><tr className="border-b border-admin-border">
+                      <th className="text-left p-4 font-semibold text-foreground">Name</th>
+                      <th className="text-left p-4 font-semibold text-foreground">Email</th>
+                      <th className="text-left p-4 font-semibold text-foreground">Role</th>
+                      <th className="text-left p-4 font-semibold text-foreground hidden lg:table-cell">Last Active</th>
+                      <th className="p-4" />
+                    </tr></thead>
+                    <tbody>
+                      {profiles.map(p => {
+                        const r = roles[p.id];
+                        const badge = r ? roleBadge[r] : null;
+                        const isSelf = p.id === currentUserId;
+                        return (
+                          <tr key={p.id} className="border-b border-admin-border/60 hover:bg-muted/50">
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">{p.full_name.charAt(0)}</div>
+                                <span className="font-medium text-foreground">{p.full_name}</span>
+                                {isSelf && <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">You</span>}
+                              </div>
+                            </td>
+                            <td className="p-4 text-muted-foreground">{p.email}</td>
+                            <td className="p-4">
+                              {badge ? (
+                                <span className={cn("px-3 py-1 rounded-full text-xs font-medium", badge.className)}>{badge.label}</span>
+                              ) : <span className="text-xs text-muted-foreground">No role</span>}
+                            </td>
+                            <td className="p-4 hidden lg:table-cell text-muted-foreground text-xs">{formatTimeAgo(p.last_sign_in)}</td>
+                            <td className="p-4 text-right">
+                              {!isSelf && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => setDeleteTarget({ id: p.id, name: p.full_name })}
+                                  className="h-9 w-9 text-destructive hover:text-destructive"
+                                  aria-label="Delete account"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile card list, below md */}
+                <div className="md:hidden divide-y divide-admin-border/60">
                   {profiles.map(p => {
                     const r = roles[p.id];
                     const badge = r ? roleBadge[r] : null;
                     const isSelf = p.id === currentUserId;
                     return (
-                      <tr key={p.id} className="border-b border-wapm-purple/[0.05] hover:bg-wapm-lavender/50">
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-wapm-purple/10 flex items-center justify-center text-wapm-purple font-bold text-xs">{p.full_name.charAt(0)}</div>
-                            <span className="font-medium text-wapm-deep-purple">{p.full_name}</span>
-                            {isSelf && <span className="text-[10px] px-2 py-0.5 rounded-full bg-wapm-lavender text-muted-foreground">You</span>}
+                      <div key={p.id} className="p-4 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">{p.full_name.charAt(0)}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-medium text-foreground truncate">{p.full_name}</p>
+                            {isSelf && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0">You</span>}
                           </div>
-                        </td>
-                        <td className="p-4 hidden md:table-cell text-muted-foreground">{p.email}</td>
-                        <td className="p-4">
-                          {badge ? (
-                            <span className={cn("px-3 py-1 rounded-full text-xs font-medium", badge.className)}>{badge.label}</span>
-                          ) : <span className="text-xs text-muted-foreground">No role</span>}
-                        </td>
-                        <td className="p-4 hidden lg:table-cell text-muted-foreground text-xs">{formatTimeAgo(p.last_sign_in)}</td>
-                        <td className="p-4 text-right">
-                          {!isSelf && (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => handleDelete(p.id, p.full_name)}
-                              className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </td>
-                      </tr>
+                          <p className="text-xs text-muted-foreground truncate">{p.email}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {badge ? (
+                              <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium", badge.className)}>{badge.label}</span>
+                            ) : <span className="text-[10px] text-muted-foreground">No role</span>}
+                            <span className="text-[10px] text-muted-foreground">{formatTimeAgo(p.last_sign_in)}</span>
+                          </div>
+                        </div>
+                        {!isSelf && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => setDeleteTarget({ id: p.id, name: p.full_name })}
+                            className="h-10 w-10 text-destructive shrink-0"
+                            aria-label="Delete account"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     );
                   })}
-                </tbody>
-              </table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -148,9 +196,9 @@ export default function AdminStaff() {
                 <div className="space-y-2 mt-2">
                   {(["editor", "contributor", "gallery_only"] as const).map(r => (
                     <label key={r} className={cn("flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors",
-                      inviteRole === r ? "border-wapm-purple bg-wapm-purple/5" : "border-wapm-purple/10"
+                      inviteRole === r ? "border-primary bg-primary/5" : "border-admin-border"
                     )}>
-                      <input type="radio" name="role" checked={inviteRole === r} onChange={() => setInviteRole(r)} className="text-wapm-purple" />
+                      <input type="radio" name="role" checked={inviteRole === r} onChange={() => setInviteRole(r)} className="accent-primary" />
                       <div>
                         <p className="font-medium text-sm capitalize">{r.replace("_", " ")}</p>
                         <p className="text-xs text-muted-foreground">
@@ -182,11 +230,27 @@ export default function AdminStaff() {
                     fetch();
                   }
                 }}
-                className="w-full rounded-full bg-wapm-purple text-white"
+                className="w-full rounded-full bg-primary text-primary-foreground"
               >
                 {inviting ? "Sending..." : "Send Invitation"}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete confirmation */}
+        <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+          <DialogContent className="sm:max-w-sm rounded-2xl">
+            <DialogHeader><DialogTitle className="text-foreground">Delete staff account?</DialogTitle></DialogHeader>
+            <p className="text-muted-foreground text-sm">
+              Permanently delete <strong>{deleteTarget?.name}</strong>'s account? This cannot be undone.
+            </p>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setDeleteTarget(null)} className="rounded-full">Go Back</Button>
+              <Button onClick={handleDelete} disabled={deleting} className="rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                {deleting ? "Deleting..." : "Delete Account"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </PermissionGuard>

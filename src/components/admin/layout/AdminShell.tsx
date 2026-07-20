@@ -18,8 +18,8 @@ export default function AdminShell({ children, title, breadcrumb }: AdminShellPr
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-wapm-lavender flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-wapm-purple border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-admin-surface flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -27,9 +27,9 @@ export default function AdminShell({ children, title, breadcrumb }: AdminShellPr
   if (!user) return <Navigate to="/admin/login" replace />;
   if (!role) {
     return (
-      <div className="min-h-screen bg-wapm-lavender flex items-center justify-center">
+      <div className="font-admin min-h-screen bg-admin-surface flex items-center justify-center">
         <div className="text-center max-w-md p-8">
-          <h2 className="text-2xl font-bold text-wapm-deep mb-2">No Access</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">No Access</h2>
           <p className="text-muted-foreground">You don't have permission to access this area. Please contact your administrator.</p>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default function AdminShell({ children, title, breadcrumb }: AdminShellPr
   }
 
   return (
-    <div className="min-h-screen bg-wapm-lavender">
+    <div className="font-admin min-h-screen bg-admin-surface">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
@@ -51,7 +51,7 @@ export default function AdminShell({ children, title, breadcrumb }: AdminShellPr
       {/* Main content */}
       <div className={cn("transition-all duration-300", collapsed ? "lg:ml-[72px]" : "lg:ml-[260px]")}>
         <AdminTopBar title={title} breadcrumb={breadcrumb} onMenuClick={() => setMobileOpen(true)} />
-        <main className="p-6 lg:p-8">{children}</main>
+        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

@@ -5,7 +5,8 @@ import PermissionGuard from "@/components/admin/shared/PermissionGuard";
 import { supabase } from "../../integrations/superbase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Eye, Briefcase } from "lucide-react";
+import { PencilSimpleIcon, EyeIcon, BriefcaseIcon, ClipboardTextIcon } from "@phosphor-icons/react";
+import { serviceIcons } from "@/lib/serviceIcons";
 
 export default function AdminServices() {
   const navigate = useNavigate();
@@ -28,33 +29,38 @@ export default function AdminServices() {
           <div className="text-center py-12 text-muted-foreground">Loading...</div>
         ) : services.length === 0 ? (
           <div className="text-center py-12">
-            <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg font-semibold text-wapm-deep-purple">No services configured yet</p>
+            <BriefcaseIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-lg font-semibold text-foreground">No services configured yet</p>
             <p className="text-sm text-muted-foreground mt-1">Services will appear here once added to the database.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {services.map(s => (
-              <Card key={s.id} className="rounded-2xl border-wapm-purple/[0.12] shadow-[0_2px_12px_rgba(45,27,78,0.08)]">
-                <CardContent className="p-5 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{s.icon || "📋"}</span>
-                    <div>
-                      <h3 className="font-semibold text-wapm-deep-purple">{s.name}</h3>
+            {services.map(s => {
+              const ServiceIcon = serviceIcons[s.slug] || ClipboardTextIcon;
+              return (
+              <Card key={s.id} className="rounded-2xl border-admin-border shadow-[0_2px_12px_rgba(20,20,30,0.06)]">
+                <CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                      <ServiceIcon className="w-5 h-5" weight="duotone" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">{s.name}</h3>
                       <p className="text-xs text-muted-foreground">Last updated: {new Date(s.updated_at).toLocaleDateString("en-GB")}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => navigate(`/admin/services/${s.id}/edit`)} className="rounded-full border-wapm-purple/20 text-wapm-purple">
-                      <Pencil className="w-3 h-3 mr-1" /> Edit
+                  <div className="flex gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/admin/services/${s.id}/edit`)} className="rounded-full border-primary/20 text-primary flex-1 sm:flex-none">
+                      <PencilSimpleIcon className="w-3.5 h-3.5 mr-1" /> Edit
                     </Button>
-                    <Button variant="ghost" size="sm" asChild className="text-wapm-cyan">
-                      <a href={`/services/${s.slug}`} target="_blank"><Eye className="w-3 h-3 mr-1" /> Preview</a>
+                    <Button variant="ghost" size="sm" asChild className="text-accent flex-1 sm:flex-none">
+                      <a href={`/services/${s.slug}`} target="_blank" rel="noopener noreferrer"><EyeIcon className="w-3.5 h-3.5 mr-1" /> Preview</a>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         )}
       </PermissionGuard>

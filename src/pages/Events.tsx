@@ -5,7 +5,7 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import RsvpButton from "@/components/events/RsvpButton";
 import EventShareButtons from "@/components/events/EventShareButtons";
 import { supabase } from "../integrations/superbase/client";
-import { ChevronLeft, ChevronRight, MapPin, Clock } from "lucide-react";
+import { CaretLeftIcon, CaretRightIcon, MapPinIcon, ClockIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -72,7 +72,7 @@ export default function Events() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-foreground text-sm">{evt.title}</h3>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="w-3 h-3" /> {evt.location || "TBC"} · <Clock className="w-3 h-3" /> {formatTime(evt.start_datetime)}</p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPinIcon className="w-3 h-3" weight="duotone" /> {evt.location || "TBC"} · <ClockIcon className="w-3 h-3" weight="duotone" /> {formatTime(evt.start_datetime)}</p>
                         </div>
                       </div>
                       {evt.description && (
@@ -92,9 +92,9 @@ export default function Events() {
                         <RsvpButton event={evt} size="sm" />
                         <Link
                           to={`/events/${evt.id}`}
-                          className="text-xs font-medium px-3 py-1.5 rounded-full border border-primary/30 text-primary hover:bg-primary hover:text-white transition-colors shrink-0"
+                          className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full border border-primary/30 text-primary hover:bg-primary hover:text-white transition-colors shrink-0"
                         >
-                          View Details →
+                          View Details <ArrowRightIcon className="w-3 h-3" weight="bold" />
                         </Link>
                       </div>
                       <div className="mt-3 pt-3 border-t border-border">
@@ -112,12 +112,12 @@ export default function Events() {
             <AnimatedSection className="mb-16">
               <div className="card-wapm p-8 max-w-3xl mx-auto" id={selectedEvent.id}>
                 <button onClick={() => setSelectedEvent(null)} className="text-sm text-primary hover:underline mb-4 inline-flex items-center gap-1">
-                  <ChevronLeft className="w-4 h-4" /> Back to calendar
+                  <CaretLeftIcon className="w-4 h-4" /> Back to calendar
                 </button>
                 <h2 className="text-2xl font-bold text-foreground mb-2">{selectedEvent.title}</h2>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                  <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {formatDate(selectedEvent.start_datetime)} at {formatTime(selectedEvent.start_datetime)}</span>
-                  {selectedEvent.location && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {selectedEvent.location}</span>}
+                  <span className="flex items-center gap-1"><ClockIcon className="w-4 h-4" weight="duotone" /> {formatDate(selectedEvent.start_datetime)} at {formatTime(selectedEvent.start_datetime)}</span>
+                  {selectedEvent.location && <span className="flex items-center gap-1"><MapPinIcon className="w-4 h-4" weight="duotone" /> {selectedEvent.location}</span>}
                 </div>
                 {selectedEvent.description && <p className="text-muted-foreground mb-6">{selectedEvent.description}</p>}
                 <div className="flex items-center gap-4 mb-4">
@@ -133,11 +133,11 @@ export default function Events() {
             <div className="card-wapm p-8 max-w-3xl mx-auto">
               <div className="flex items-center justify-between mb-8">
                 <button onClick={prev} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" aria-label="Previous month">
-                  <ChevronLeft className="w-5 h-5" />
+                  <CaretLeftIcon className="w-5 h-5" />
                 </button>
                 <h3 className="text-xl font-semibold text-primary">{monthNames[month]} {year}</h3>
                 <button onClick={next} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" aria-label="Next month">
-                  <ChevronRight className="w-5 h-5" />
+                  <CaretRightIcon className="w-5 h-5" />
                 </button>
               </div>
               <div className="grid grid-cols-7 gap-1">
@@ -170,11 +170,11 @@ export default function Events() {
                   {selectedDateEvents.map(evt => (
                     <div key={evt.id} className="p-4 rounded-xl bg-muted cursor-pointer hover:bg-muted/80 transition-colors" onClick={() => setSelectedEvent(evt)}>
                       <h4 className="font-semibold text-foreground">{evt.title}</h4>
-                      <p className="text-sm text-muted-foreground"><MapPin className="w-3 h-3 inline" /> {evt.location || "TBC"} · <Clock className="w-3 h-3 inline" /> {formatTime(evt.start_datetime)}</p>
+                      <p className="text-sm text-muted-foreground"><MapPinIcon className="w-3 h-3 inline" weight="duotone" /> {evt.location || "TBC"} · <ClockIcon className="w-3 h-3 inline" weight="duotone" /> {formatTime(evt.start_datetime)}</p>
                       {evt.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{evt.description}</p>}
                       <div className="flex items-center gap-3 mt-3">
                         <RsvpButton event={evt} size="sm" />
-                        <Link to={`/events/${evt.id}`} className="text-xs text-primary hover:underline">View Details →</Link>
+                        <Link to={`/events/${evt.id}`} className="inline-flex items-center gap-1 text-xs text-primary hover:underline">View Details <ArrowRightIcon className="w-3 h-3" weight="bold" /></Link>
                       </div>
                     </div>
                   ))}

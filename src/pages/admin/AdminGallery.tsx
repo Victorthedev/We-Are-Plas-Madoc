@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Trash2, Pencil, Image } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { PlusIcon, TrashIcon, PencilSimpleIcon, ImageIcon, CheckIcon } from "@phosphor-icons/react";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -21,11 +21,16 @@ export default function AdminGallery() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [showUpload, setShowUpload] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
   const [uploadUrl, setUploadUrl] = useState("");
   const [uploadCaption, setUploadCaption] = useState("");
   const [uploadCategory, setUploadCategory] = useState("general");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleteSelectedConfirm, setDeleteSelectedConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -38,8 +43,15 @@ export default function AdminGallery() {
 
   const filtered = filter === "all" ? items : items.filter(i => i.category === filter);
 
+  const toggleSelect = (id: string) => {
+    const s = new Set(selected);
+    s.has(id) ? s.delete(id) : s.add(id);
+    setSelected(s);
+  };
+
   const handleUpload = async () => {
     if (!uploadUrl.trim()) { toast.error("Image URL required"); return; }
+    setUploading(true);
     await supabase.from("gallery_items").insert({
       image_url: uploadUrl, caption: uploadCaption || null,
       category: uploadCategory, uploaded_by: user?.id,
@@ -51,24 +63,39 @@ export default function AdminGallery() {
     toast.success("Photo added!");
     setShowUpload(false);
     setUploadUrl(""); setUploadCaption(""); setUploadCategory("general");
+    setUploading(false);
     fetchItems();
   };
 
   const handleDeleteSelected = async () => {
-    if (!confirm(`Delete ${selected.size} photos?`)) return;
+    setDeleting(true);
     for (const id of selected) {
       await supabase.from("gallery_items").delete().eq("id", id);
     }
     toast.success("Deleted");
     setSelected(new Set());
+    setDeleteSelectedConfirm(false);
+    setDeleting(false);
+    fetchItems();
+  };
+
+  const handleDeleteOne = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    await supabase.from("gallery_items").delete().eq("id", deleteTarget.id);
+    toast.success("Deleted");
+    setDeleteTarget(null);
+    setDeleting(false);
     fetchItems();
   };
 
   const handleSaveEdit = async () => {
     if (!editItem) return;
+    setSavingEdit(true);
     await supabase.from("gallery_items").update({ caption: editItem.caption, category: editItem.category }).eq("id", editItem.id);
     toast.success("Updated");
     setEditItem(null);
+    setSavingEdit(false);
     fetchItems();
   };
 
@@ -80,20 +107,20 @@ export default function AdminGallery() {
             {["all", ...categories].map(c => (
               <button key={c} onClick={() => setFilter(c)}
                 className={cn("px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors border",
-                  filter === c ? "bg-wapm-purple text-white border-wapm-purple" : "bg-white text-wapm-purple border-wapm-purple/20"
+                  filter === c ? "bg-primary text-primary-foreground border-primary" : "bg-card text-primary border-primary/20"
                 )}>{c}</button>
             ))}
           </div>
-          <Button onClick={() => setShowUpload(true)} className="rounded-full bg-wapm-purple hover:bg-wapm-dark-purple text-white">
-            <Plus className="w-4 h-4 mr-1" /> Upload Photos
+          <Button onClick={() => setShowUpload(true)} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
+            <PlusIcon className="w-4 h-4 mr-1" weight="bold" /> Upload Photos
           </Button>
         </div>
 
         {selected.size > 0 && (
-          <div className="bg-wapm-deep-purple text-white rounded-full px-6 py-2 flex items-center gap-4 mb-4 inline-flex">
-            <span className="text-sm">{selected.size} selected</span>
-            <Button size="sm" variant="ghost" onClick={handleDeleteSelected} className="text-white hover:text-red-300"><Trash2 className="w-4 h-4 mr-1" /> Delete</Button>
-            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} className="text-white/70">Deselect</Button>
+          <div className="sticky top-16 z-30 bg-admin-chrome text-white rounded-full px-4 sm:px-6 py-2 flex items-center gap-3 sm:gap-4 mb-4 w-fit max-w-full">
+            <span className="text-sm whitespace-nowrap">{selected.size} selected</span>
+            <Button size="sm" variant="ghost" onClick={() => setDeleteSelectedConfirm(true)} className="text-white hover:text-red-300 h-8"><TrashIcon className="w-4 h-4 mr-1" /> Delete</Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())} className="text-white/70 h-8">Deselect</Button>
           </div>
         )}
 
@@ -101,30 +128,45 @@ export default function AdminGallery() {
           <div className="text-center py-12 text-muted-foreground">Loading...</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
-            <Image className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-lg font-semibold text-wapm-deep-purple">No photos yet</p>
+            <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-lg font-semibold text-foreground">No photos yet</p>
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+          <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 sm:gap-4">
             {filtered.map(item => (
-              <div key={item.id} className="break-inside-avoid mb-4 group relative">
+              <div key={item.id} className="break-inside-avoid mb-3 sm:mb-4 relative group rounded-xl overflow-hidden">
                 <img src={item.image_url} alt={item.caption || "Gallery"} className="w-full rounded-xl" loading="lazy" />
-                <div className="absolute inset-0 bg-wapm-deep-purple/60 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <input type="checkbox" checked={selected.has(item.id)}
-                    onChange={e => {
-                      const s = new Set(selected);
-                      e.target.checked ? s.add(item.id) : s.delete(item.id);
-                      setSelected(s);
-                    }}
-                    className="absolute top-3 left-3 w-5 h-5" />
-                  <Button size="icon" variant="ghost" onClick={() => setEditItem(item)} className="text-white"><Pencil className="w-4 h-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={async () => {
-                    if (!confirm("Delete this photo?")) return;
-                    await supabase.from("gallery_items").delete().eq("id", item.id);
-                    toast.success("Deleted"); fetchItems();
-                  }} className="text-white"><Trash2 className="w-4 h-4" /></Button>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+
+                {/* Selection checkbox: always visible, not hover-gated */}
+                <button
+                  onClick={() => toggleSelect(item.id)}
+                  className={cn(
+                    "absolute top-2 left-2 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-colors shadow-sm",
+                    selected.has(item.id) ? "bg-primary border-primary" : "bg-white/85 border-white"
+                  )}
+                  aria-label={selected.has(item.id) ? "Deselect photo" : "Select photo"}
+                >
+                  {selected.has(item.id) && <CheckIcon className="w-4 h-4 text-white" weight="bold" />}
+                </button>
+
+                {/* Edit/delete: always visible, not hover-gated */}
+                <div className="absolute bottom-2 right-2 flex gap-1.5">
+                  <button
+                    onClick={() => setEditItem(item)}
+                    className="w-8 h-8 rounded-full bg-black/55 backdrop-blur-sm flex items-center justify-center text-white"
+                    aria-label="Edit photo"
+                  >
+                    <PencilSimpleIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(item)}
+                    className="w-8 h-8 rounded-full bg-black/55 backdrop-blur-sm flex items-center justify-center text-white"
+                    aria-label="Delete photo"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
                 </div>
-                {item.caption && <p className="text-xs text-muted-foreground mt-1">{item.caption}</p>}
               </div>
             ))}
           </div>
@@ -147,7 +189,9 @@ export default function AdminGallery() {
                   <SelectContent>{categories.map(c => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleUpload} className="w-full rounded-full bg-wapm-purple text-white">Upload</Button>
+              <Button onClick={handleUpload} disabled={uploading} className="w-full rounded-full bg-primary text-primary-foreground">
+                {uploading ? "Uploading..." : "Upload"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -167,9 +211,39 @@ export default function AdminGallery() {
                     <SelectContent>{categories.map(c => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <Button onClick={handleSaveEdit} className="w-full rounded-full bg-wapm-purple text-white">Save Changes</Button>
+                <Button onClick={handleSaveEdit} disabled={savingEdit} className="w-full rounded-full bg-primary text-primary-foreground">
+                  {savingEdit ? "Saving..." : "Save Changes"}
+                </Button>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete one confirmation */}
+        <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+          <DialogContent className="sm:max-w-sm rounded-2xl">
+            <DialogHeader><DialogTitle className="text-foreground">Delete photo?</DialogTitle></DialogHeader>
+            <p className="text-muted-foreground text-sm">This cannot be undone.</p>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setDeleteTarget(null)} className="rounded-full">Go Back</Button>
+              <Button onClick={handleDeleteOne} disabled={deleting} className="rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                {deleting ? "Deleting..." : "Delete Photo"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete selected confirmation */}
+        <Dialog open={deleteSelectedConfirm} onOpenChange={setDeleteSelectedConfirm}>
+          <DialogContent className="sm:max-w-sm rounded-2xl">
+            <DialogHeader><DialogTitle className="text-foreground">Delete {selected.size} photos?</DialogTitle></DialogHeader>
+            <p className="text-muted-foreground text-sm">This cannot be undone.</p>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setDeleteSelectedConfirm(false)} className="rounded-full">Go Back</Button>
+              <Button onClick={handleDeleteSelected} disabled={deleting} className="rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                {deleting ? "Deleting..." : `Delete ${selected.size} Photos`}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </PermissionGuard>

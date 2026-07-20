@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/superbase/client";
+import { HouseIcon, LeafIcon, UsersIcon, SunIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 type GalleryItem = {
   id: string;
@@ -9,7 +10,10 @@ type GalleryItem = {
   caption: string | null;
 };
 
-const placeholderEmojis = ["🏘️", "🌿", "🤝", "☀️"];
+const placeholderIcons = [HouseIcon, LeafIcon, UsersIcon, SunIcon];
+const placeholderTints = ["bg-primary/12", "bg-accent/12", "bg-wapm-pink/12", "bg-wapm-green/12"];
+const tileRotation = [-6, 5, -4, 7];
+const tileOffset = ["", "mt-10", "-mt-4", "mt-6"];
 
 export default function AboutStrip() {
   const [photos, setPhotos] = useState<GalleryItem[]>([]);
@@ -34,31 +38,34 @@ export default function AboutStrip() {
               We Are Plas Madoc is a community-led organisation dedicated to improving opportunities and quality of life for residents in Plas Madoc. Our work is shaped by local people, their ideas, skills and lived experience.
             </p>
             <p className="text-muted-foreground mb-8 leading-relaxed">
-              Our staff and volunteers include many local residents who bring deep knowledge and a genuine understanding of what matters here. Whether it's transport, food, play or simply a place to connect — everything we do is rooted in the needs of the community.
+              Our staff and volunteers include many local residents who bring deep knowledge and a genuine understanding of what matters here. Whether it's transport, food, play or simply a place to connect, everything we do is rooted in the needs of the community.
             </p>
-            <Link to="/team" className="btn-primary">Our Story →</Link>
+            <Link to="/team" className="btn-primary inline-flex items-center gap-1.5">Our Story <ArrowRightIcon className="w-4 h-4" weight="bold" /></Link>
           </AnimatedSection>
           <AnimatedSection delay={0.2}>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6 px-2">
               {[0, 1, 2, 3].map((i) => {
                 const photo = photos[i];
+                const Icon = placeholderIcons[i];
                 return (
                   <div
                     key={i}
-                    className="aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-primary/15 to-accent/15"
-                    style={{ transform: `rotate(${i % 2 === 0 ? -2 : 2}deg)` }}
+                    className={`bg-card rounded-2xl p-2 transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)] ${tileOffset[i]}`}
+                    style={{ transform: `rotate(${tileRotation[i]}deg)`, boxShadow: "var(--shadow-card)" }}
                   >
-                    {photo ? (
-                      <img
-                        src={photo.image_url}
-                        alt={photo.caption || "Community photo"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-primary/5 flex items-center justify-center text-4xl opacity-30">
-                        {placeholderEmojis[i]}
+                    <div className="aspect-square rounded-xl overflow-hidden transition-transform duration-300 hover:-translate-y-1">
+                      <div className={`w-full h-full flex items-center justify-center ${placeholderTints[i]}`}>
+                        {photo ? (
+                          <img
+                            src={photo.image_url}
+                            alt={photo.caption || "Community photo"}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Icon className="w-10 h-10 text-foreground/30" weight="duotone" />
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
