@@ -89,6 +89,13 @@ export async function saveCheck(id: string, patch: Partial<Pick<DailyLogCheckRow
   if (error) throw error;
 }
 
+/** One round trip to mark a whole batch of items checked at once, e.g. "Everything's Fine" for a section. */
+export async function saveChecksBulk(ids: string[], patch: Partial<Pick<DailyLogCheckRow, "checked" | "checked_by" | "initials">>) {
+  if (ids.length === 0) return;
+  const { error } = await supabase.from("daily_log_checks").update(patch).in("id", ids);
+  if (error) throw error;
+}
+
 export async function saveLogFields(id: string, patch: Partial<Omit<DailyLogRow, "id">>) {
   const { error } = await supabase.from("daily_logs").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", id);
   if (error) throw error;

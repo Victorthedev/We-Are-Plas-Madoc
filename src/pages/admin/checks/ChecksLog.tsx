@@ -12,19 +12,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   CloudSunIcon, QuotesIcon, HeartbeatIcon, IdentificationBadgeIcon, FlagIcon,
-  CalendarBlankIcon, UsersIcon, ClockIcon, CircleNotchIcon, CheckCircleIcon, WarningIcon, PlusIcon,
+  CalendarBlankIcon, UsersIcon, ClockIcon, CircleNotchIcon, CheckCircleIcon, WarningIcon, PlusIcon, PencilSimpleIcon,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { formatPlayground } from "@/lib/vms";
 import {
-  fetchTodayLogs, createLog, fetchLogChecks, fetchLogById, fetchChecklistItems, fetchReflectionData, saveCheck, saveLogFields, todayKey,
+  fetchTodayLogs, createLog, fetchLogChecks, fetchLogById, fetchChecklistItems, fetchReflectionData, saveCheck, saveChecksBulk, saveLogFields, todayKey,
   type DailyLogRow, type DailyLogCheckRow, type ChecklistItemRow, type ReflectionData,
 } from "@/lib/dailyLog";
 import PlaygroundFilter, { usePlaygroundFilter } from "@/components/admin/vms/PlaygroundFilter";
 import { cn } from "@/lib/utils";
 
 function ChecklistSection({
-  title, items, checks, onToggle, onInitials, onComment, onFlag, notes, onNotes, notesLabel,
+  title, items, checks, onToggle, onInitials, onComment, onFlag, onMarkAllFine, notes, onNotes, notesLabel,
 }: {
   title: string;
   items: ChecklistItemRow[];
@@ -33,47 +33,82 @@ function ChecklistSection({
   onInitials: (checkId: string, value: string) => void;
   onComment: (checkId: string, value: string) => void;
   onFlag: (item: ChecklistItemRow, check: DailyLogCheckRow) => void;
+  onMarkAllFine: () => void;
   notes: string;
   onNotes: (value: string) => void;
   notesLabel: string;
 }) {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggleExpanded = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const remaining = items.filter((item) => {
+    const check = checks.find((c) => c.checklist_item_id === item.id);
+    return check && !check.checked && !check.comment;
+  }).length;
+
   return (
     <Card className="rounded-2xl border-admin-border shadow-[0_2px_12px_rgba(20,20,30,0.06)] mb-6">
       <CardContent className="p-6">
-        <h3 className="font-semibold text-foreground mb-4">{title}</h3>
-        <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h3 className="font-semibold text-foreground">{title}</h3>
+          {remaining > 0 && (
+            <button
+              onClick={onMarkAllFine}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-wapm-green/30 text-wapm-green hover:bg-wapm-green/10 transition-colors shrink-0"
+            >
+              <CheckCircleIcon className="w-3.5 h-3.5" weight="fill" /> Everything's Fine
+            </button>
+          )}
+        </div>
+        <div className="space-y-1">
           {items.map((item) => {
             const check = checks.find((c) => c.checklist_item_id === item.id);
             if (!check) return null;
+            const expanded = expandedIds.has(item.id) || !!check.comment;
             return (
-              <div key={item.id} className="pb-4 border-b border-admin-border/60 last:border-0 last:pb-0">
-                <div className="flex items-start gap-3">
-                  <Checkbox checked={check.checked} onCheckedChange={(v) => onToggle(check.id, !!v)} className="mt-1 shrink-0" />
+              <div key={item.id} className="py-2 border-b border-admin-border/60 last:border-0">
+                <div className="flex items-center gap-3">
+                  <Checkbox checked={check.checked} onCheckedChange={(v) => onToggle(check.id, !!v)} className="shrink-0" />
                   <p className="text-sm text-foreground flex-1">{item.label}</p>
+                  <button
+                    onClick={() => toggleExpanded(item.id)}
+                    className="shrink-0 text-muted-foreground hover:text-primary transition-colors p-1"
+                    aria-label={expanded ? "Hide details" : "Add name or comment"}
+                  >
+                    {check.comment ? <FlagIcon className="w-4 h-4 text-amber-600" weight="fill" /> : <PencilSimpleIcon className="w-4 h-4" />}
+                  </button>
                 </div>
-                <div className="flex flex-wrap gap-2 mt-2 ml-7">
-                  <Input
-                    key={`${check.id}-${check.initials || ""}`}
-                    placeholder="Name"
-                    defaultValue={check.initials || ""}
-                    onBlur={(e) => onInitials(check.id, e.target.value)}
-                    className="rounded-[10px] h-9 flex-1 min-w-[140px]"
-                  />
-                  <Input
-                    placeholder="Comment (optional)"
-                    defaultValue={check.comment || ""}
-                    onBlur={(e) => onComment(check.id, e.target.value)}
-                    className="rounded-[10px] h-9 flex-1 min-w-[160px]"
-                  />
-                  {check.comment && (
-                    <button
-                      onClick={() => onFlag(item, check)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors shrink-0"
-                    >
-                      <FlagIcon className="w-3.5 h-3.5" weight="fill" /> Create Task
-                    </button>
-                  )}
-                </div>
+                {expanded && (
+                  <div className="flex flex-wrap gap-2 mt-2 ml-8">
+                    <Input
+                      key={`${check.id}-${check.initials || ""}`}
+                      placeholder="Name"
+                      defaultValue={check.initials || ""}
+                      onBlur={(e) => onInitials(check.id, e.target.value)}
+                      className="rounded-[10px] h-9 flex-1 min-w-[140px]"
+                    />
+                    <Input
+                      placeholder="Comment (optional)"
+                      defaultValue={check.comment || ""}
+                      onBlur={(e) => onComment(check.id, e.target.value)}
+                      className="rounded-[10px] h-9 flex-1 min-w-[160px]"
+                    />
+                    {check.comment && (
+                      <button
+                        onClick={() => onFlag(item, check)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border border-amber-300 text-amber-700 hover:bg-amber-50 transition-colors shrink-0"
+                      >
+                        <FlagIcon className="w-3.5 h-3.5" weight="fill" /> Create Task
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -188,6 +223,30 @@ export default function ChecksLog() {
     updateCheckLocal(checkId, patch);
     runSave(() => saveCheck(checkId, patch));
   };
+  const handleMarkAllFine = (sectionItems: ChecklistItemRow[]) => {
+    if (!user) return;
+    const toMark = sectionItems
+      .map((item) => checks.find((c) => c.checklist_item_id === item.id))
+      .filter((c): c is DailyLogCheckRow => !!c && !c.checked && !c.comment);
+    if (toMark.length === 0) return;
+
+    const withoutName = toMark.filter((c) => !c.initials).map((c) => c.id);
+    const withName = toMark.filter((c) => c.initials).map((c) => c.id);
+
+    setChecks((prev) => prev.map((c) => {
+      if (withoutName.includes(c.id)) return { ...c, checked: true, checked_by: user.id, initials: profile?.full_name || c.initials };
+      if (withName.includes(c.id)) return { ...c, checked: true, checked_by: user.id };
+      return c;
+    }));
+
+    if (withoutName.length > 0) {
+      runSave(() => saveChecksBulk(withoutName, { checked: true, checked_by: user.id, initials: profile?.full_name }));
+    }
+    if (withName.length > 0) {
+      runSave(() => saveChecksBulk(withName, { checked: true, checked_by: user.id }));
+    }
+  };
+
   const handleInitials = (checkId: string, value: string) => {
     updateCheckLocal(checkId, { initials: value });
     runSave(() => saveCheck(checkId, { initials: value }));
@@ -205,6 +264,8 @@ export default function ChecksLog() {
 
   const playground = log?.playground || selectedPlayground;
   const isToday = log ? log.log_date === todayKey() : true;
+  const openingItems = items.filter((i) => i.section === "opening");
+  const closingItems = items.filter((i) => i.section === "closing");
 
   const handleFlag = (item: ChecklistItemRow, check: DailyLogCheckRow) => {
     navigate("/admin/checks/tasks", {
@@ -332,12 +393,13 @@ export default function ChecksLog() {
 
             <ChecklistSection
               title="Opening Checks"
-              items={items.filter((i) => i.section === "opening")}
+              items={openingItems}
               checks={checks}
               onToggle={handleToggle}
               onInitials={handleInitials}
               onComment={handleComment}
               onFlag={handleFlag}
+              onMarkAllFine={() => handleMarkAllFine(openingItems)}
               notes={log.opening_notes || ""}
               onNotes={(v) => updateLogField("opening_notes", v)}
               notesLabel="Additional observations"
@@ -345,12 +407,13 @@ export default function ChecksLog() {
 
             <ChecklistSection
               title="Closing Checks"
-              items={items.filter((i) => i.section === "closing")}
+              items={closingItems}
               checks={checks}
               onToggle={handleToggle}
               onInitials={handleInitials}
               onComment={handleComment}
               onFlag={handleFlag}
+              onMarkAllFine={() => handleMarkAllFine(closingItems)}
               notes={log.closing_notes || ""}
               onNotes={(v) => updateLogField("closing_notes", v)}
               notesLabel="Additional observations"

@@ -11,9 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   BabyIcon, StudentIcon, UserListIcon, HandshakeIcon, ClockIcon, BellIcon,
-  ArrowRightIcon, QuotesIcon, CloudSunIcon, ShareIcon, CopyIcon, CheckIcon, PencilSimpleIcon,
+  ArrowRightIcon, QuotesIcon, CloudSunIcon, ShareIcon, CopyIcon, CheckIcon, PencilSimpleIcon, ListChecksIcon, WarningIcon,
 } from "@phosphor-icons/react";
-import { getQuoteOfDay, fetchCustomQuote, setCustomQuote, clearCustomQuote, fetchWeatherNow, isYouthClubAge, type WeatherNow } from "@/lib/vms";
+import { getQuoteOfDay, fetchCustomQuote, setCustomQuote, clearCustomQuote, fetchWeatherNow, isYouthClubAge, formatPlayground, PLAYGROUNDS, type WeatherNow } from "@/lib/vms";
 import PlaygroundFilter, { usePlaygroundFilter } from "@/components/admin/vms/PlaygroundFilter";
 
 const todayKey = () => format(new Date(), "yyyy-MM-dd");
@@ -30,6 +30,8 @@ export default function VmsOverview() {
   const [quoteEditOpen, setQuoteEditOpen] = useState(false);
   const [quoteDraft, setQuoteDraft] = useState("");
   const [savingQuote, setSavingQuote] = useState(false);
+  const [missingLogPlaygrounds, setMissingLogPlaygrounds] = useState<string[]>([]);
+  const [myOpenTaskCount, setMyOpenTaskCount] = useState(0);
 
   const registrationUrl = `${window.location.origin}/register`;
   const copyRegistrationLink = async () => {
@@ -104,6 +106,20 @@ export default function VmsOverview() {
     fetchWeatherNow().then(setWeather);
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+    const checkTodayStatus = async () => {
+      const sitesToCheck = playgroundFilter !== "all" ? [playgroundFilter] : PLAYGROUNDS.map((p) => p.value);
+      const { data: logs } = await supabase.from("daily_logs").select("playground").eq("log_date", todayKey()).in("playground", sitesToCheck);
+      const started = new Set((logs || []).map((l) => l.playground));
+      setMissingLogPlaygrounds(sitesToCheck.filter((s) => !started.has(s)));
+
+      const { count } = await supabase.from("vms_tasks").select("id", { count: "exact", head: true }).eq("assigned_to", user.id).neq("status", "resolved");
+      setMyOpenTaskCount(count || 0);
+    };
+    checkTodayStatus();
+  }, [playgroundFilter, user]);
+
   const statCards = [
     { icon: BabyIcon, iconBg: "bg-primary/10 text-primary", value: stats.children, label: "Children (0-9)", link: "/admin/vms/children" },
     { icon: StudentIcon, iconBg: "bg-wapm-cyan/10 text-wapm-cyan", value: stats.youth, label: "Youth Club (10-17)", link: "/admin/vms/youth" },
@@ -124,6 +140,43 @@ export default function VmsOverview() {
     <AdminShell title="Visitor Management" breadcrumb="Dashboard > Visitor Management">
       <PermissionGuard roles={["super_admin", "playground_worker"]}>
         <div className="mb-6"><PlaygroundFilter /></div>
+
+        {(missingLogPlaygrounds.length > 0 || myOpenTaskCount > 0) && (
+          <Card className="rounded-2xl border-amber-200 bg-amber-50/50 mb-6">
+            <CardContent className="p-5">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+                <ListChecksIcon className="w-4 h-4 text-amber-700" weight="bold" /> Today's Status
+              </h3>
+              <div className="space-y-2">
+                {missingLogPlaygrounds.map((pg) => (
+                  <Link
+                    key={pg}
+                    to={`/admin/checks?playground=${pg}`}
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/60 hover:bg-white transition-colors"
+                  >
+                    <span className="text-sm text-foreground flex items-center gap-2">
+                      <WarningIcon className="w-4 h-4 text-amber-700 shrink-0" weight="fill" />
+                      {formatPlayground(pg)} hasn't started today's log
+                    </span>
+                    <ArrowRightIcon className="w-3.5 h-3.5 text-amber-700 shrink-0" weight="bold" />
+                  </Link>
+                ))}
+                {myOpenTaskCount > 0 && (
+                  <Link
+                    to="/admin/checks/tasks"
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/60 hover:bg-white transition-colors"
+                  >
+                    <span className="text-sm text-foreground flex items-center gap-2">
+                      <WarningIcon className="w-4 h-4 text-amber-700 shrink-0" weight="fill" />
+                      {myOpenTaskCount} task{myOpenTaskCount === 1 ? "" : "s"} assigned to you still open
+                    </span>
+                    <ArrowRightIcon className="w-3.5 h-3.5 text-amber-700 shrink-0" weight="bold" />
+                  </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quote of the day + weather */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
