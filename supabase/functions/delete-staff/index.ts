@@ -37,14 +37,13 @@ serve(async (req) => {
   }
   if (!userId) return json({ error: "Unauthorized" }, 401);
 
-  // Verify caller is a super_admin
-  const { data: roleRow } = await adminClient
+  // Verify caller is a super_admin (a caller may hold several roles, so check membership, not a single row)
+  const { data: roleRows } = await adminClient
     .from("user_roles")
     .select("role")
-    .eq("user_id", userId)
-    .single();
+    .eq("user_id", userId);
 
-  if (roleRow?.role !== "super_admin") return json({ error: "Forbidden: super_admin only" }, 403);
+  if (!roleRows?.some((r) => r.role === "super_admin")) return json({ error: "Forbidden: super_admin only" }, 403);
 
   try {
     const { user_id } = await req.json();

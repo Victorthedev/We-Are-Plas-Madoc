@@ -82,7 +82,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "WAPM Website <noreply@weareplasmadoc.co.uk>",
-        to: ["weareplasmadoc@avow.org"],
+        to: ["claire.pugh@avow.org"],
+        cc: ["katie.st.john@avow.org"],
         subject: `New message: ${subject}`,
         html: staffNotificationHtml(name, email, phone || "", subject, message),
       }),

@@ -30,11 +30,11 @@ function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
-async function sendEmail(resendKey: string, to: string, subject: string, html: string) {
+async function sendEmail(resendKey: string, to: string, subject: string, html: string, cc?: string[]) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: "WAPM <noreply@weareplasmadoc.co.uk>", to: [to], subject, html }),
+    body: JSON.stringify({ from: "WAPM <noreply@weareplasmadoc.co.uk>", to: [to], ...(cc ? { cc } : {}), subject, html }),
   });
   if (!res.ok) {
     const err = await res.text();
@@ -173,7 +173,7 @@ serve(async (req) => {
       const { count } = await supabase.from("event_rsvps").select("*", { count: "exact", head: true }).eq("event_id", event_id);
 
       // Send notification to staff
-      await sendEmail(RESEND_API_KEY, "weareplasmadoc@avow.org", `New RSVP — ${event.title} — ${first_name} ${last_name || ""}`, staffNotificationHtml(rsvp, event, count || 1));
+      await sendEmail(RESEND_API_KEY, "claire.pugh@avow.org", `New RSVP — ${event.title} — ${first_name} ${last_name || ""}`, staffNotificationHtml(rsvp, event, count || 1), ["katie.st.john@avow.org"]);
 
       return new Response(JSON.stringify({ success: true, rsvp_id: rsvp.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }

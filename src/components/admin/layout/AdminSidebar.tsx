@@ -1,8 +1,12 @@
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/superbase/client";
 import {
   SquaresFourIcon, NewspaperIcon, CalendarBlankIcon, ImageIcon, UsersIcon, ChatCircleIcon,
-  BriefcaseIcon, UserGearIcon, GearIcon, SignOutIcon, CaretLeftIcon, CaretRightIcon, HandshakeIcon, ClipboardTextIcon, ChartBarIcon
+  BriefcaseIcon, UserGearIcon, GearIcon, SignOutIcon, CaretLeftIcon, CaretRightIcon, HandshakeIcon, ClipboardTextIcon, ChartBarIcon,
+  BabyIcon, UserListIcon, CheckSquareIcon, StudentIcon, ChartLineIcon, FirstAidKitIcon, IdentificationBadgeIcon,
+  GaugeIcon, BellIcon, ListChecksIcon, ClockCounterClockwiseIcon, KanbanIcon, ClipboardIcon
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +23,26 @@ const navItems = [
   { icon: UsersIcon, label: "Team", path: "/admin/team", roles: ["super_admin", "editor"] },
 ];
 
+const vmsNavItems = [
+  { icon: GaugeIcon, label: "Overview", path: "/admin/vms", roles: ["super_admin", "playground_worker"] },
+  { icon: BabyIcon, label: "Children", path: "/admin/vms/children", roles: ["super_admin", "playground_worker"] },
+  { icon: StudentIcon, label: "Youth Club", path: "/admin/vms/youth", roles: ["super_admin", "playground_worker"] },
+  { icon: UserListIcon, label: "Parents", path: "/admin/vms/parents", roles: ["super_admin", "playground_worker"] },
+  { icon: HandshakeIcon, label: "Volunteers", path: "/admin/vms/volunteers", roles: ["super_admin", "playground_worker"] },
+  { icon: CheckSquareIcon, label: "Attendance", path: "/admin/vms/attendance", roles: ["super_admin", "playground_worker"] },
+  { icon: FirstAidKitIcon, label: "Incidents", path: "/admin/vms/incidents", roles: ["super_admin", "playground_worker"] },
+  { icon: IdentificationBadgeIcon, label: "Visitor Log", path: "/admin/vms/visitors", roles: ["super_admin", "playground_worker"] },
+  { icon: ChartLineIcon, label: "Reports", path: "/admin/vms/reports", roles: ["super_admin", "playground_worker"] },
+  { icon: BellIcon, label: "Notifications", path: "/admin/vms/notifications", roles: ["super_admin", "playground_worker"] },
+];
+
+const checksNavItems = [
+  { icon: ListChecksIcon, label: "Today's Log", path: "/admin/checks", roles: ["super_admin", "playground_worker"] },
+  { icon: ClockCounterClockwiseIcon, label: "History", path: "/admin/checks/history", roles: ["super_admin", "playground_worker"] },
+  { icon: KanbanIcon, label: "Tasks", path: "/admin/checks/tasks", roles: ["super_admin", "playground_worker"] },
+  { icon: ClipboardIcon, label: "Checklist Items", path: "/admin/checks/items", roles: ["super_admin"] },
+];
+
 const bottomItems = [
   { icon: UserGearIcon, label: "Staff Accounts", path: "/admin/staff", roles: ["super_admin"] },
   { icon: GearIcon, label: "Settings", path: "/admin/settings", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
@@ -29,16 +53,35 @@ const roleBadge: Record<string, { label: string; className: string }> = {
   editor: { label: "Editor", className: "bg-accent/20 text-white" },
   contributor: { label: "Contributor", className: "bg-wapm-green/20 text-white" },
   gallery_only: { label: "Gallery", className: "bg-wapm-pink/20 text-white" },
+  playground_worker: { label: "Playground Worker", className: "bg-wapm-cyan/20 text-white" },
 };
+
+// Every admin page mounts its own AdminSidebar (routes aren't nested under a
+// persistent layout), so the nav's scroll position would reset to the top on
+// every navigation without this — kept outside the component so it survives
+// the remount.
+let savedNavScrollTop = 0;
 
 export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const { pathname } = useLocation();
-  const { profile, role, signOut, hasPermission } = useAuth();
-  const badge = role ? roleBadge[role] : null;
+  const { user, profile, roles, signOut, hasPermission } = useAuth();
+  const badges = roles.map((r) => roleBadge[r]).filter(Boolean);
+  const navRef = useRef<HTMLElement>(null);
+  const [myOpenTasks, setMyOpenTasks] = useState(0);
 
-  const isActive = (path: string) => path === "/admin" ? pathname === "/admin" : pathname.startsWith(path);
+  useLayoutEffect(() => {
+    if (navRef.current) navRef.current.scrollTop = savedNavScrollTop;
+  }, []);
 
-  const renderItem = (item: typeof navItems[0]) => {
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("vms_tasks").select("id", { count: "exact", head: true }).eq("assigned_to", user.id).neq("status", "resolved")
+      .then(({ count }) => setMyOpenTasks(count || 0));
+  }, [user]);
+
+  const isActive = (path: string) => ["/admin", "/admin/vms", "/admin/checks"].includes(path) ? pathname === path : pathname.startsWith(path);
+
+  const renderItem = (item: typeof navItems[0], badge?: number) => {
     if (!hasPermission(item.roles as any)) return null;
     const active = isActive(item.path);
     return (
@@ -55,7 +98,10 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
           title={collapsed ? item.label : undefined}
         >
           <item.icon className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>{item.label}</span>}
+          {!collapsed && <span className="flex-1">{item.label}</span>}
+          {!collapsed && !!badge && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">{badge}</span>
+          )}
         </Link>
       </li>
     );
@@ -84,10 +130,28 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
       </div>
 
       {/* Nav items */}
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1 px-2">{navItems.map(renderItem)}</ul>
+      <nav
+        ref={navRef}
+        onScroll={(e) => { savedNavScrollTop = e.currentTarget.scrollTop; }}
+        className="flex-1 overflow-y-auto py-4"
+      >
+        <ul className="space-y-1 px-2">{navItems.map((item) => renderItem(item))}</ul>
+        {hasPermission(["playground_worker"]) && (
+          <>
+            <div className="border-t border-admin-chrome-border my-4 mx-4" />
+            {!collapsed && <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/30">Visitor Management</p>}
+            <ul className="space-y-1 px-2">{vmsNavItems.map((item) => renderItem(item))}</ul>
+          </>
+        )}
+        {hasPermission(["playground_worker"]) && (
+          <>
+            <div className="border-t border-admin-chrome-border my-4 mx-4" />
+            {!collapsed && <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/30">Daily Log</p>}
+            <ul className="space-y-1 px-2">{checksNavItems.map((item) => renderItem(item, item.label === "Tasks" ? myOpenTasks : undefined))}</ul>
+          </>
+        )}
         <div className="border-t border-admin-chrome-border my-4 mx-4" />
-        <ul className="space-y-1 px-2">{bottomItems.map(renderItem)}</ul>
+        <ul className="space-y-1 px-2">{bottomItems.map((item) => renderItem(item))}</ul>
       </nav>
 
       {/* User */}
@@ -99,11 +163,13 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{profile?.full_name}</p>
-              {badge && (
-                <span className={cn("inline-block text-[10px] px-2 py-0.5 rounded-full mt-0.5", badge.className)}>
-                  {badge.label}
-                </span>
-              )}
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                {badges.map((badge) => (
+                  <span key={badge.label} className={cn("inline-block text-[10px] px-2 py-0.5 rounded-full", badge.className)}>
+                    {badge.label}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>

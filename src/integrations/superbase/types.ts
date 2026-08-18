@@ -447,8 +447,11 @@ export type Database = {
       }
       volunteers: {
         Row: {
+          child_id: string | null
           created_at: string
           cv_link: string | null
+          dbs_checked_status: string
+          dbs_number: string | null
           email: string
           first_name: string
           id: string
@@ -459,10 +462,14 @@ export type Database = {
           position: string
           start_date: string | null
           status: string
+          volunteer_type: string | null
         }
         Insert: {
+          child_id?: string | null
           created_at?: string
           cv_link?: string | null
+          dbs_checked_status?: string
+          dbs_number?: string | null
           email: string
           first_name: string
           id?: string
@@ -473,10 +480,14 @@ export type Database = {
           position: string
           start_date?: string | null
           status?: string
+          volunteer_type?: string | null
         }
         Update: {
+          child_id?: string | null
           created_at?: string
           cv_link?: string | null
+          dbs_checked_status?: string
+          dbs_number?: string | null
           email?: string
           first_name?: string
           id?: string
@@ -487,8 +498,690 @@ export type Database = {
           position?: string
           start_date?: string | null
           status?: string
+          volunteer_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteers_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incidents: {
+        Row: {
+          action_taken: string | null
+          child_id: string | null
+          created_at: string
+          description: string
+          follow_up_notes: string | null
+          follow_up_required: boolean
+          id: string
+          incident_type: string
+          occurred_at: string | null
+          occurred_on: string
+          parent_id: string | null
+          parent_notified: boolean
+          person_name: string
+          person_type: string
+          playground: string | null
+          reported_by: string
+          volunteer_id: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          child_id?: string | null
+          created_at?: string
+          description: string
+          follow_up_notes?: string | null
+          follow_up_required?: boolean
+          id?: string
+          incident_type: string
+          occurred_at?: string | null
+          occurred_on?: string
+          parent_id?: string | null
+          parent_notified?: boolean
+          person_name: string
+          person_type: string
+          playground?: string | null
+          reported_by: string
+          volunteer_id?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          child_id?: string | null
+          created_at?: string
+          description?: string
+          follow_up_notes?: string | null
+          follow_up_required?: boolean
+          id?: string
+          incident_type?: string
+          occurred_at?: string | null
+          occurred_on?: string
+          parent_id?: string | null
+          parent_notified?: boolean
+          person_name?: string
+          person_type?: string
+          playground?: string | null
+          reported_by?: string
+          volunteer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      adult_visitors: {
+        Row: {
+          created_at: string
+          id: string
+          logged_by: string
+          name: string
+          playground: string | null
+          reason: string
+          time_from: string | null
+          time_to: string | null
+          visit_date: string
+          visitor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logged_by: string
+          name: string
+          playground?: string | null
+          reason: string
+          time_from?: string | null
+          time_to?: string | null
+          visit_date?: string
+          visitor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logged_by?: string
+          name?: string
+          playground?: string | null
+          reason?: string
+          time_from?: string | null
+          time_to?: string | null
+          visit_date?: string
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adult_visitors_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "external_visitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      external_visitors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          organisation: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          organisation?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          organisation?: string | null
         }
         Relationships: []
+      }
+      vms_daily_quotes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          quote_date: string
+          quote_text: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          quote_date: string
+          quote_text: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          quote_date?: string
+          quote_text?: string
+        }
+        Relationships: []
+      }
+      children: {
+        Row: {
+          additional_learning_needs: string | null
+          allergies: string | null
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          archived_at: string | null
+          archived_reason: string | null
+          created_at: string
+          date_of_birth: string
+          ethnicity: string | null
+          first_name: string
+          id: string
+          internal_notes: string | null
+          last_name: string
+          medical_conditions: string | null
+          photo_url: string | null
+          playground: string
+          registration_source: string
+          updated_at: string
+        }
+        Insert: {
+          additional_learning_needs?: string | null
+          allergies?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          archived_at?: string | null
+          archived_reason?: string | null
+          created_at?: string
+          date_of_birth: string
+          ethnicity?: string | null
+          first_name: string
+          id?: string
+          internal_notes?: string | null
+          last_name: string
+          medical_conditions?: string | null
+          photo_url?: string | null
+          playground: string
+          registration_source?: string
+          updated_at?: string
+        }
+        Update: {
+          additional_learning_needs?: string | null
+          allergies?: string | null
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          archived_at?: string | null
+          archived_reason?: string | null
+          created_at?: string
+          date_of_birth?: string
+          ethnicity?: string | null
+          first_name?: string
+          id?: string
+          internal_notes?: string | null
+          last_name?: string
+          medical_conditions?: string | null
+          photo_url?: string | null
+          playground?: string
+          registration_source?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      parents: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          cultural_background: string | null
+          date_of_birth: string | null
+          first_name: string
+          id: string
+          language: string | null
+          last_name: string
+          phone: string
+          playground: string | null
+          religion: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          cultural_background?: string | null
+          date_of_birth?: string | null
+          first_name: string
+          id?: string
+          language?: string | null
+          last_name: string
+          phone: string
+          playground?: string | null
+          religion?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          cultural_background?: string | null
+          date_of_birth?: string | null
+          first_name?: string
+          id?: string
+          language?: string | null
+          last_name?: string
+          phone?: string
+          playground?: string | null
+          religion?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      child_parent_links: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          is_primary_contact: boolean
+          parent_id: string
+          relationship: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          is_primary_contact?: boolean
+          parent_id: string
+          relationship?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          is_primary_contact?: boolean
+          parent_id?: string
+          relationship?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_parent_links_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_parent_links_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance: {
+        Row: {
+          activity_notes: string | null
+          attended_on: string
+          check_in_time: string | null
+          check_out_time: string | null
+          child_id: string | null
+          created_at: string
+          id: string
+          parent_id: string | null
+          playground: string | null
+          recorded_by: string
+          service: string
+          volunteer_id: string | null
+        }
+        Insert: {
+          activity_notes?: string | null
+          attended_on?: string
+          check_in_time?: string | null
+          check_out_time?: string | null
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          playground?: string | null
+          recorded_by: string
+          service?: string
+          volunteer_id?: string | null
+        }
+        Update: {
+          activity_notes?: string | null
+          attended_on?: string
+          check_in_time?: string | null
+          check_out_time?: string | null
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          playground?: string | null
+          recorded_by?: string
+          service?: string
+          volunteer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vms_activity_log: {
+        Row: {
+          action_type: string
+          content_id: string | null
+          content_type: string
+          created_at: string
+          id: string
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          action_type: string
+          content_id?: string | null
+          content_type: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          action_type?: string
+          content_id?: string | null
+          content_type?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          child_id: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          notification_type: string
+          parent_id: string | null
+          person_type: string | null
+          volunteer_id: string | null
+        }
+        Insert: {
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          notification_type: string
+          parent_id?: string | null
+          person_type?: string | null
+          volunteer_id?: string | null
+        }
+        Update: {
+          child_id?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          notification_type?: string
+          parent_id?: string | null
+          person_type?: string | null
+          volunteer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "parents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_items: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          label: string
+          section: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label: string
+          section: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          label?: string
+          section?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      daily_logs: {
+        Row: {
+          closing_notes: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          log_date: string
+          opening_notes: string | null
+          playground: string
+          quote_snapshot: string | null
+          reflection_notes: string | null
+          session_time_from: string | null
+          session_time_to: string | null
+          staff_team: string | null
+          term_type: string | null
+          updated_at: string
+          weather_snapshot: string | null
+        }
+        Insert: {
+          closing_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          log_date: string
+          opening_notes?: string | null
+          playground: string
+          quote_snapshot?: string | null
+          reflection_notes?: string | null
+          session_time_from?: string | null
+          session_time_to?: string | null
+          staff_team?: string | null
+          term_type?: string | null
+          updated_at?: string
+          weather_snapshot?: string | null
+        }
+        Update: {
+          closing_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          log_date?: string
+          opening_notes?: string | null
+          playground?: string
+          quote_snapshot?: string | null
+          reflection_notes?: string | null
+          session_time_from?: string | null
+          session_time_to?: string | null
+          staff_team?: string | null
+          term_type?: string | null
+          updated_at?: string
+          weather_snapshot?: string | null
+        }
+        Relationships: []
+      }
+      daily_log_checks: {
+        Row: {
+          checked: boolean
+          checked_by: string | null
+          checklist_item_id: string
+          comment: string | null
+          daily_log_id: string
+          id: string
+          initials: string | null
+        }
+        Insert: {
+          checked?: boolean
+          checked_by?: string | null
+          checklist_item_id: string
+          comment?: string | null
+          daily_log_id: string
+          id?: string
+          initials?: string | null
+        }
+        Update: {
+          checked?: boolean
+          checked_by?: string | null
+          checklist_item_id?: string
+          comment?: string | null
+          daily_log_id?: string
+          id?: string
+          initials?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_log_checks_checklist_item_id_fkey"
+            columns: ["checklist_item_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_log_checks_daily_log_id_fkey"
+            columns: ["daily_log_id"]
+            isOneToOne: false
+            referencedRelation: "daily_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vms_tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          daily_log_check_id: string | null
+          description: string | null
+          id: string
+          last_reminded_at: string | null
+          playground: string | null
+          resolved_at: string | null
+          resolved_notes: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          daily_log_check_id?: string | null
+          description?: string | null
+          id?: string
+          last_reminded_at?: string | null
+          playground?: string | null
+          resolved_at?: string | null
+          resolved_notes?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          daily_log_check_id?: string | null
+          description?: string | null
+          id?: string
+          last_reminded_at?: string | null
+          playground?: string | null
+          resolved_at?: string | null
+          resolved_notes?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vms_tasks_daily_log_check_id_fkey"
+            columns: ["daily_log_check_id"]
+            isOneToOne: false
+            referencedRelation: "daily_log_checks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -499,6 +1192,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: { role: Database["public"]["Enums"]["app_role"] }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -508,7 +1205,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "editor" | "contributor" | "gallery_only"
+      app_role: "super_admin" | "editor" | "contributor" | "gallery_only" | "playground_worker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -636,7 +1333,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "editor", "contributor", "gallery_only"],
+      app_role: ["super_admin", "editor", "contributor", "gallery_only", "playground_worker"],
     },
   },
 } as const

@@ -9,7 +9,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: { full_name: string; email: string; avatar_url: string | null } | null;
-  role: AppRole | null;
+  roles: AppRole[];
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -24,17 +24,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<AuthContextType["profile"]>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProfileAndRole = async (userId: string) => {
-    const [profileRes, roleRes] = await Promise.all([
+    const [profileRes, rolesRes] = await Promise.all([
       supabase.from("profiles").select("full_name, email, avatar_url").eq("id", userId).single(),
-      supabase.rpc("get_user_role", { _user_id: userId }),
+      supabase.rpc("get_user_roles", { _user_id: userId }),
     ]);
     if (profileRes.data) setProfile(profileRes.data);
-    if (roleRes.data) setRole(roleRes.data as AppRole);
-    
+    if (rolesRes.data) setRoles(rolesRes.data.map((r) => r.role as AppRole));
+
     // Update last_sign_in
     supabase.from("profiles").update({ last_sign_in: new Date().toISOString() }).eq("id", userId).then();
   };
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => fetchProfileAndRole(session.user.id), 0);
       } else {
         setProfile(null);
-        setRole(null);
+        setRoles([]);
       }
       setLoading(false);
     });
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
-    setRole(null);
+    setRoles([]);
   };
 
   const resetPassword = async (email: string) => {
@@ -90,12 +90,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const hasPermission = (requiredRoles: AppRole[]) => {
-    if (!role) return false;
-    return requiredRoles.includes(role);
+    if (roles.includes("super_admin")) return true;
+    return requiredRoles.some((r) => roles.includes(r));
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, role, loading, signIn, signOut, resetPassword, updatePassword, hasPermission }}>
+    <AuthContext.Provider value={{ user, session, profile, roles, loading, signIn, signOut, resetPassword, updatePassword, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

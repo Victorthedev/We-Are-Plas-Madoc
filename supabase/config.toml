@@ -1,4 +1,4 @@
-project_id = "taraxykfzpevawrpalus"
+project_id = "aurcamruwoameygvyecv"
 
 [functions.handle-rsvp]
 verify_jwt = false
@@ -7,4 +7,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.notify-event-cancellation]
+verify_jwt = false
+
+[functions.handle-child-registration]
+verify_jwt = false
+
+[functions.vms-daily-notifications]
+verify_jwt = false
+
+[functions.task-reminders]
 verify_jwt = false

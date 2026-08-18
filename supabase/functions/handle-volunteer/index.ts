@@ -107,18 +107,19 @@ serve(async (req) => {
 
     if (dbError) return json({ error: dbError.message }, 400);
 
-    const sendEmail = (to: string, subject: string, html: string) =>
+    const sendEmail = (to: string, subject: string, html: string, cc?: string[]) =>
       fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ from: "WAPM <noreply@weareplasmadoc.co.uk>", to: [to], subject, html }),
+        body: JSON.stringify({ from: "WAPM <noreply@weareplasmadoc.co.uk>", to: [to], ...(cc ? { cc } : {}), subject, html }),
       });
 
     // Notify staff
     await sendEmail(
-      "weareplasmadoc@avow.org",
+      "claire.pugh@avow.org",
       `New volunteer application — ${position} — ${first_name} ${last_name}`,
-      staffNotificationHtml({ first_name, last_name, email, phone, position, start_date, message, cv_link })
+      staffNotificationHtml({ first_name, last_name, email, phone, position, start_date, message, cv_link }),
+      ["katie.st.john@avow.org"]
     );
 
     // Confirm receipt to the applicant

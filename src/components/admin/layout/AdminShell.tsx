@@ -12,7 +12,7 @@ interface AdminShellProps {
 }
 
 export default function AdminShell({ children, title, breadcrumb }: AdminShellProps) {
-  const { user, role, loading } = useAuth();
+  const { user, roles, loading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -25,7 +25,7 @@ export default function AdminShell({ children, title, breadcrumb }: AdminShellPr
   }
 
   if (!user) return <Navigate to="/admin/login" replace />;
-  if (!role) {
+  if (roles.length === 0) {
     return (
       <div className="font-admin min-h-screen bg-admin-surface flex items-center justify-center">
         <div className="text-center max-w-md p-8">

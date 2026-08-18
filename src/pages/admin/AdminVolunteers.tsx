@@ -5,11 +5,16 @@ import { supabase } from "../../integrations/superbase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { EyeIcon, CheckIcon, XIcon, HandshakeIcon, WarningIcon } from "@phosphor-icons/react";
+import { EyeIcon, CheckIcon, XIcon, HandshakeIcon, WarningIcon, ShieldIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const isVmsIncomplete = (v: any) => v.status === "accepted" && (!v.volunteer_type || v.dbs_checked_status !== "checked");
 
 const tabs = ["new", "in-progress", "accepted", "declined", "all"] as const;
 const statusColors: Record<string, string> = {
@@ -60,12 +65,30 @@ export default function AdminVolunteers() {
     toast.success("Notes saved");
   };
 
+  const saveVmsProfile = async () => {
+    if (!selected) return;
+    await supabase.from("volunteers").update({
+      volunteer_type: selected.volunteer_type || null,
+      dbs_number: selected.dbs_number || null,
+      dbs_checked_status: selected.dbs_checked_status || "pending",
+    }).eq("id", selected.id);
+    toast.success("VMS profile saved");
+    fetch();
+  };
+
+  const incompleteCount = volunteers.filter(isVmsIncomplete).length;
+
   return (
     <AdminShell title="Volunteer Applications" breadcrumb="Dashboard > Volunteers">
       <PermissionGuard roles={["super_admin", "editor"]}>
         {newCount > 0 && (
-          <p className="text-sm text-amber-600 font-medium mb-4 flex items-center gap-1.5">
+          <p className="text-sm text-amber-600 font-medium mb-2 flex items-center gap-1.5">
             <WarningIcon className="w-4 h-4 shrink-0" weight="fill" /> {newCount} new application{newCount === 1 ? "" : "s"} need your attention
+          </p>
+        )}
+        {incompleteCount > 0 && (
+          <p className="text-sm text-wapm-cyan font-medium mb-4 flex items-center gap-1.5">
+            <ShieldIcon className="w-4 h-4 shrink-0" weight="fill" /> {incompleteCount} accepted volunteer{incompleteCount === 1 ? "" : "s"} still need a DBS/type check before they're VMS-ready
           </p>
         )}
 
@@ -111,7 +134,16 @@ export default function AdminVolunteers() {
                           <td className="p-4 hidden lg:table-cell text-muted-foreground text-xs">
                             {new Date(v.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                           </td>
-                          <td className="p-4"><span className={cn("px-3 py-1 rounded-full text-xs font-medium", statusColors[v.status])}>{v.status}</span></td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={cn("px-3 py-1 rounded-full text-xs font-medium", statusColors[v.status])}>{v.status}</span>
+                              {isVmsIncomplete(v) && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-wapm-cyan/20 text-wapm-cyan">
+                                  <ShieldIcon className="w-3 h-3" weight="fill" /> DBS pending
+                                </span>
+                              )}
+                            </div>
+                          </td>
                           <td className="p-4">
                             <div className="flex justify-end gap-1">
                               <Button size="icon" variant="ghost" onClick={() => setSelected(v)} className="h-9 w-9 text-primary" aria-label="View application"><EyeIcon className="w-4 h-4" /></Button>
@@ -133,7 +165,14 @@ export default function AdminVolunteers() {
                     <div key={v.id} className="p-4">
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <h3 className="font-medium text-foreground">{v.first_name} {v.last_name}</h3>
-                        <span className={cn("shrink-0 px-2.5 py-1 rounded-full text-xs font-medium", statusColors[v.status])}>{v.status}</span>
+                        <div className="shrink-0 flex items-center gap-1">
+                          <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", statusColors[v.status])}>{v.status}</span>
+                          {isVmsIncomplete(v) && (
+                            <span className="inline-flex items-center px-1.5 py-1 rounded-full bg-wapm-cyan/20 text-wapm-cyan" title="DBS pending">
+                              <ShieldIcon className="w-3 h-3" weight="fill" />
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 mb-3">
                         <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", positionColors[v.position] || "bg-gray-100 text-gray-600")}>{v.position}</span>
@@ -172,6 +211,42 @@ export default function AdminVolunteers() {
                   {selected.start_date && <div><strong>Start date:</strong> {selected.start_date}</div>}
                   {selected.cv_link && <div><strong>CV:</strong> <a href={selected.cv_link} target="_blank" rel="noopener noreferrer" className="text-primary">View</a></div>}
                   {selected.message && <div><strong>Message:</strong><p className="mt-1 text-muted-foreground">{selected.message}</p></div>}
+
+                  {selected.status === "accepted" && (
+                    <div className="border-t border-border pt-4 space-y-3">
+                      <div className="flex items-center gap-1.5">
+                        <ShieldIcon className="w-4 h-4 text-wapm-cyan" weight="fill" />
+                        <strong>VMS Profile</strong>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Volunteer Type</Label>
+                        <Select value={selected.volunteer_type || ""} onValueChange={(v) => setSelected({ ...selected, volunteer_type: v })}>
+                          <SelectTrigger className="rounded-[10px] mt-1"><SelectValue placeholder="Select type" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="adult">Adult volunteer</SelectItem>
+                            <SelectItem value="child">Child volunteer (under 18)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">DBS Certificate Number</Label>
+                        <Input value={selected.dbs_number || ""} onChange={(e) => setSelected({ ...selected, dbs_number: e.target.value })} className="rounded-[10px] mt-1" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">DBS Checked Status</Label>
+                        <Select value={selected.dbs_checked_status || "pending"} onValueChange={(v) => setSelected({ ...selected, dbs_checked_status: v })}>
+                          <SelectTrigger className="rounded-[10px] mt-1"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="checked">Checked</SelectItem>
+                            <SelectItem value="not_required">Not required</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button onClick={saveVmsProfile} size="sm" className="rounded-full bg-primary text-primary-foreground w-full">Save VMS Profile</Button>
+                    </div>
+                  )}
+
                   <div className="border-t border-border pt-4">
                     <strong>Internal Notes</strong>
                     <Textarea value={selected.internal_notes || ""} onChange={e => setSelected({ ...selected, internal_notes: e.target.value })}
