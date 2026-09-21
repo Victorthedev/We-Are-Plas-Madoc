@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendEmail } from "../_shared/mailer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,8 +48,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  if (!RESEND_API_KEY) return json({ error: "RESEND_API_KEY not configured" }, 500);
+  if (!Deno.env.get("GMAIL_SMTP_USER") || !Deno.env.get("GMAIL_SMTP_PASSWORD")) {
+    return json({ error: "GMAIL_SMTP_USER/GMAIL_SMTP_PASSWORD not configured" }, 500);
+  }
 
   const supabaseUrl = Deno.env.get("SUPERBASE_URL")!;
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -74,19 +76,12 @@ serve(async (req) => {
     if (dbError) return json({ error: dbError.message }, 400);
 
     // Notify staff by email
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "WAPM Website <noreply@weareplasmadoc.co.uk>",
-        to: ["weareplasmadoc@avow.org"],
-        subject: `New message: ${subject}`,
-        html: staffNotificationHtml(name, email, phone || "", subject, message),
-      }),
-    });
+    await sendEmail(
+      "claire.pugh@avow.org",
+      `New message: ${subject}`,
+      staffNotificationHtml(name, email, phone || "", subject, message),
+      { cc: ["katie.st.john@avow.org"] }
+    );
 
     return json({ success: true });
   } catch (err) {

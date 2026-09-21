@@ -37,20 +37,20 @@ serve(async (req) => {
   }
   if (!userId) return json({ error: "Unauthorized" }, 401);
 
-  // Verify the caller is a super_admin
-  const { data: roleRow } = await adminClient
+  // Verify the caller is a super_admin (a caller may hold several roles, so check membership, not a single row)
+  const { data: roleRows } = await adminClient
     .from("user_roles")
     .select("role")
-    .eq("user_id", userId)
-    .single();
+    .eq("user_id", userId);
 
-  if (roleRow?.role !== "super_admin") return json({ error: "Forbidden: super_admin only" }, 403);
+  if (!roleRows?.some((r) => r.role === "super_admin")) return json({ error: "Forbidden: super_admin only" }, 403);
 
   try {
-    const { email, full_name, role } = await req.json();
+    const { email, full_name, roles } = await req.json();
+    const roleList: string[] = Array.isArray(roles) ? roles : roles ? [roles] : [];
 
-    if (!email || !full_name || !role) {
-      return json({ error: "Email, name and role are required" }, 400);
+    if (!email || !full_name || roleList.length === 0) {
+      return json({ error: "Email, name and at least one role are required" }, 400);
     }
 
     // Invite via Supabase Auth — this sends the invitation email automatically
@@ -69,10 +69,10 @@ serve(async (req) => {
       full_name,
     });
 
-    await adminClient.from("user_roles").upsert({
-      user_id: newUser.id,
-      role,
-    });
+    await adminClient.from("user_roles").upsert(
+      roleList.map((role) => ({ user_id: newUser.id, role })),
+      { onConflict: "user_id,role" }
+    );
 
     return json({ success: true });
   } catch (err) {

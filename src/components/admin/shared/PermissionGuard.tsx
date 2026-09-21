@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import type { Database } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/superbase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 

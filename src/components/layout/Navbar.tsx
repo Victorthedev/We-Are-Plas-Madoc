@@ -26,6 +26,7 @@ const navLinks = [
   { label: "Events", to: "/events", dropdown: undefined },
   { label: "Get Involved", to: "/get-involved", dropdown: undefined },
   { label: "Gallery", to: "/gallery", dropdown: undefined },
+  { label: "Donate", to: "/donate", dropdown: undefined },
   { label: "Contact Us", to: "/contact", dropdown: undefined },
 ];
 

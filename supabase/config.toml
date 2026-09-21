@@ -1,4 +1,13 @@
-project_id = "taraxykfzpevawrpalus"
+project_id = "aurcamruwoameygvyecv"
+
+# Neither is used by this app (no Realtime subscriptions in the codebase; analytics only
+# powers Studio's Logs tab) — disabled locally since they were the flaky/slow-to-heal
+# services during startup on this machine, and skipping them isn't a real capability loss.
+[realtime]
+enabled = false
+
+[analytics]
+enabled = false
 
 [functions.handle-rsvp]
 verify_jwt = false
@@ -7,4 +16,19 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.notify-event-cancellation]
+verify_jwt = false
+
+[functions.handle-child-registration]
+verify_jwt = false
+
+[functions.vms-daily-notifications]
+verify_jwt = false
+
+[functions.task-reminders]
+verify_jwt = false
+
+[functions.create-donation-checkout]
+verify_jwt = false
+
+[functions.stripe-webhook]
 verify_jwt = false
