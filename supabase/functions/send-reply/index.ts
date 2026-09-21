@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendEmail } from "../_shared/mailer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -45,8 +46,9 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  if (!RESEND_API_KEY) return json({ error: "RESEND_API_KEY not configured" }, 500);
+  if (!Deno.env.get("GMAIL_SMTP_USER") || !Deno.env.get("GMAIL_SMTP_PASSWORD")) {
+    return json({ error: "GMAIL_SMTP_USER/GMAIL_SMTP_PASSWORD not configured" }, 500);
+  }
 
   const supabaseUrl = Deno.env.get("SUPERBASE_URL")!;
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -76,26 +78,14 @@ serve(async (req) => {
 
     const subject = original_subject ? `Re: ${original_subject}` : "Reply from We Are Plas Madoc";
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "WAPM <noreply@weareplasmadoc.co.uk>",
-        reply_to: "weareplasmadoc@avow.org",
-        to: [to_email],
-        subject,
-        html: replyHtml(to_name || "there", original_subject || "", reply_body, staff_name || "The WAPM Team"),
-      }),
-    });
+    const ok = await sendEmail(
+      to_email,
+      subject,
+      replyHtml(to_name || "there", original_subject || "", reply_body, staff_name || "The WAPM Team"),
+      { replyTo: "weareplasmadoc@avow.org" }
+    );
 
-    if (!res.ok) {
-      const err = await res.text();
-      console.error("Resend error:", err);
-      return json({ error: "Failed to send email" }, 500);
-    }
+    if (!ok) return json({ error: "Failed to send email" }, 500);
 
     return json({ success: true });
   } catch (err) {

@@ -6,7 +6,7 @@ import {
   SquaresFourIcon, NewspaperIcon, CalendarBlankIcon, ImageIcon, UsersIcon, ChatCircleIcon,
   BriefcaseIcon, UserGearIcon, GearIcon, SignOutIcon, CaretLeftIcon, CaretRightIcon, HandshakeIcon, ClipboardTextIcon, ChartBarIcon,
   BabyIcon, UserListIcon, CheckSquareIcon, StudentIcon, ChartLineIcon, FirstAidKitIcon, IdentificationBadgeIcon,
-  GaugeIcon, BellIcon, ListChecksIcon, ClockCounterClockwiseIcon, KanbanIcon, ClipboardIcon
+  GaugeIcon, BellIcon, ListChecksIcon, ClockCounterClockwiseIcon, KanbanIcon, ClipboardIcon, HeartStraightIcon
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,7 @@ const checksNavItems = [
 ];
 
 const bottomItems = [
+  { icon: HeartStraightIcon, label: "Donations", path: "/admin/donations", roles: ["super_admin"] },
   { icon: UserGearIcon, label: "Staff Accounts", path: "/admin/staff", roles: ["super_admin"] },
   { icon: GearIcon, label: "Settings", path: "/admin/settings", roles: ["super_admin", "editor", "contributor", "gallery_only"] },
 ];

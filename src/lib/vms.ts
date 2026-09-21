@@ -43,6 +43,11 @@ export function getYouthAgeBand(age: number): YouthAgeBand {
   return "16-17";
 }
 
+export function summarizeAttendance(rows: { child_id?: string | null; parent_id?: string | null; volunteer_id?: string | null }[]) {
+  const uniquePeople = new Set(rows.map((r) => r.child_id || r.parent_id || r.volunteer_id)).size;
+  return { uniquePeople, totalVisits: rows.length };
+}
+
 /** True for roughly the first month after a child's 10th birthday, for the "new to Youth Club" badge. */
 export function isNewToYouthClub(dateOfBirth: string): boolean {
   const dob = new Date(dateOfBirth);

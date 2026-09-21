@@ -40,10 +40,12 @@ import AdminServices from "./pages/admin/AdminServices";
 import AdminServiceEditor from "./pages/admin/AdminServiceEditor";
 import AdminTeam from "./pages/admin/AdminTeam";
 import AdminStaff from "./pages/admin/AdminStaff";
+import AdminDonations from "./pages/admin/AdminDonations";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import EventDetail from "./pages/EventDetail";
 import Register from "./pages/Register";
+import Donate from "./pages/Donate";
 import VmsOverview from "./pages/admin/vms/VmsOverview";
 import VmsChildren from "./pages/admin/vms/VmsChildren";
 import VmsChildEditor from "./pages/admin/vms/VmsChildEditor";
@@ -110,6 +112,7 @@ const App = () => (
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/team" element={<PublicLayout><Team /></PublicLayout>} />
             <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
+            <Route path="/donate" element={<PublicLayout><Donate /></PublicLayout>} />
 
             {/* Admin auth routes (no shell) */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -132,6 +135,7 @@ const App = () => (
             <Route path="/admin/services/:id/edit" element={<AdminServiceEditor />} />
             <Route path="/admin/team" element={<AdminTeam />} />
             <Route path="/admin/staff" element={<AdminStaff />} />
+            <Route path="/admin/donations" element={<AdminDonations />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
 

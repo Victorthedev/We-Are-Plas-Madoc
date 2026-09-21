@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import "https://deno.land/std@0.208.0/dotenv/load.ts";
+import { sendEmail } from "../_shared/mailer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,19 +29,6 @@ function formatDate(dateStr: string) {
 
 function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-}
-
-async function sendEmail(resendKey: string, to: string, subject: string, html: string, cc?: string[]) {
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: "WAPM <noreply@weareplasmadoc.co.uk>", to: [to], ...(cc ? { cc } : {}), subject, html }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Resend error:", err);
-  }
-  return res.ok;
 }
 
 function confirmationEmailHtml(rsvp: any, event: any, calLinks: any, cancelUrl: string) {
@@ -125,8 +113,9 @@ function cancellationAckHtml(firstName: string, eventTitle: string) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  if (!RESEND_API_KEY) return new Response(JSON.stringify({ error: "RESEND_API_KEY not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  if (!Deno.env.get("GMAIL_SMTP_USER") || !Deno.env.get("GMAIL_SMTP_PASSWORD")) {
+    return new Response(JSON.stringify({ error: "GMAIL_SMTP_USER/GMAIL_SMTP_PASSWORD not configured" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
   const supabaseUrl = Deno.env.get("SUPERBASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -167,13 +156,18 @@ serve(async (req) => {
       const calLinks = generateCalendarLinks(event);
 
       // Send confirmation to attendee
-      await sendEmail(RESEND_API_KEY, email, `We're glad you're coming for ${event.title}! 🎉`, confirmationEmailHtml(rsvp, event, calLinks, cancelUrl));
+      await sendEmail(email, `We're glad you're coming for ${event.title}! 🎉`, confirmationEmailHtml(rsvp, event, calLinks, cancelUrl));
 
       // Get total RSVP count
       const { count } = await supabase.from("event_rsvps").select("*", { count: "exact", head: true }).eq("event_id", event_id);
 
       // Send notification to staff
-      await sendEmail(RESEND_API_KEY, "claire.pugh@avow.org", `New RSVP — ${event.title} — ${first_name} ${last_name || ""}`, staffNotificationHtml(rsvp, event, count || 1), ["katie.st.john@avow.org"]);
+      await sendEmail(
+        "claire.pugh@avow.org",
+        `New RSVP — ${event.title} — ${first_name} ${last_name || ""}`,
+        staffNotificationHtml(rsvp, event, count || 1),
+        { cc: ["katie.st.john@avow.org"] }
+      );
 
       return new Response(JSON.stringify({ success: true, rsvp_id: rsvp.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -192,7 +186,7 @@ serve(async (req) => {
       const eventTitle = (rsvp as any).events?.title || "the event";
 
       await supabase.from("event_rsvps").delete().eq("id", rsvp.id);
-      await sendEmail(RESEND_API_KEY, rsvp.email, `RSVP Cancelled — ${eventTitle}`, cancellationAckHtml(rsvp.first_name, eventTitle));
+      await sendEmail(rsvp.email, `RSVP Cancelled — ${eventTitle}`, cancellationAckHtml(rsvp.first_name, eventTitle));
 
       return new Response(JSON.stringify({ success: true, event_title: eventTitle, first_name: rsvp.first_name }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }

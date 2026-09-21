@@ -73,6 +73,8 @@ export default function VmsAttendance() {
   const [expandedAttendanceKey, setExpandedAttendanceKey] = useState<string | null>(null);
 
   const today = format(new Date(), "yyyy-MM-dd");
+  const [markingDate, setMarkingDate] = useState(today);
+  const isMarkingToday = markingDate === today;
 
   const fetchAll = async () => {
     setLoading(true);
@@ -80,7 +82,7 @@ export default function VmsAttendance() {
       supabase.from("children").select("id, first_name, last_name, playground, date_of_birth").is("archived_at", null),
       supabase.from("parents").select("id, first_name, last_name, playground"),
       supabase.from("volunteers").select("id, first_name, last_name").eq("status", "accepted"),
-      supabase.from("attendance").select("id, child_id, parent_id, volunteer_id, service, playground, children(first_name, last_name), parents(first_name, last_name, playground), volunteers(first_name, last_name)").eq("attended_on", today),
+      supabase.from("attendance").select("id, child_id, parent_id, volunteer_id, service, playground, children(first_name, last_name), parents(first_name, last_name, playground), volunteers(first_name, last_name)").eq("attended_on", markingDate),
     ]);
     const merged: Person[] = [
       ...(children || []).map((c) => ({ id: c.id, first_name: c.first_name, last_name: c.last_name, type: "child" as const, playground: c.playground, dateOfBirth: c.date_of_birth })),
@@ -92,7 +94,7 @@ export default function VmsAttendance() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [markingDate]);
 
   // Keyed by `${id}-${service}` for children (a youth-age child can be present at both
   // services same day); just `${id}` for parents; volunteers can log multiple shifts,
@@ -115,18 +117,18 @@ export default function VmsAttendance() {
     if (presentKeys.has(key) || !user) return;
     setMarking(key);
     const payload = person.type === "child"
-      ? { child_id: person.id, playground: person.playground, service, recorded_by: user.id }
-      : { parent_id: person.id, playground: person.playground, recorded_by: user.id };
+      ? { child_id: person.id, playground: person.playground, service, recorded_by: user.id, attended_on: markingDate }
+      : { parent_id: person.id, playground: person.playground, recorded_by: user.id, attended_on: markingDate };
 
     const { error } = await supabase.from("attendance").insert(payload);
     setMarking(null);
 
     if (error) {
-      if (error.code === "23505") toast.error(`${person.first_name} is already marked present today`);
+      if (error.code === "23505") toast.error(`${person.first_name} is already marked present ${isMarkingToday ? "today" : `on ${format(new Date(markingDate), "d MMM yyyy")}`}`);
       else toast.error(error.message);
       return;
     }
-    toast.success(`${person.first_name} ${person.last_name} marked present${person.type === "child" ? ` (${service === "youth_club" ? "Youth Club" : "Playground"})` : ""}`);
+    toast.success(`${person.first_name} ${person.last_name} marked present${person.type === "child" ? ` (${service === "youth_club" ? "Youth Club" : "Playground"})` : ""}${isMarkingToday ? "" : ` on ${format(new Date(markingDate), "d MMM yyyy")}`}`);
     fetchAll();
   };
 
@@ -148,6 +150,7 @@ export default function VmsAttendance() {
       check_out_time: shiftTo || null,
       activity_notes: shiftNotes || null,
       recorded_by: user.id,
+      attended_on: markingDate,
     });
     setSavingShift(false);
 
@@ -294,11 +297,29 @@ export default function VmsAttendance() {
         {viewMode === "live" && (
         <>
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-2">
-          <p className="text-sm text-muted-foreground">
-            {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-          </p>
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              value={markingDate}
+              max={today}
+              onChange={(e) => setMarkingDate(e.target.value)}
+              className="rounded-[10px] h-9 w-auto"
+            />
+            {!isMarkingToday && (
+              <Button variant="outline" size="sm" onClick={() => setMarkingDate(today)} className="rounded-full border-admin-border">
+                Today
+              </Button>
+            )}
+          </div>
           <PlaygroundFilter />
         </div>
+        {!isMarkingToday && (
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-2.5 mb-4">
+            <p className="text-xs text-amber-800 font-medium">
+              You're marking attendance for {format(new Date(markingDate), "EEEE d MMMM yyyy")}, not today.
+            </p>
+          </div>
+        )}
         {playgroundFilter !== "all" && (
           <p className="text-xs text-muted-foreground mb-4">Volunteers aren't tied to one playground, so they always show regardless of this filter.</p>
         )}
@@ -390,9 +411,11 @@ export default function VmsAttendance() {
         )}
 
         <div>
-          <h3 className="text-sm font-semibold text-foreground mb-3">Present today ({visibleTodaysAttendance.length})</h3>
+          <h3 className="text-sm font-semibold text-foreground mb-3">
+            {isMarkingToday ? "Present today" : `Present on ${format(new Date(markingDate), "d MMM yyyy")}`} ({visibleTodaysAttendance.length})
+          </h3>
           {visibleTodaysAttendance.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No one marked present yet today.</p>
+            <p className="text-sm text-muted-foreground">{isMarkingToday ? "No one marked present yet today." : "No one marked present on this date yet."}</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {visibleTodaysAttendance.map((a) => {
@@ -495,7 +518,12 @@ export default function VmsAttendance() {
               <CardContent className="p-0">
                 {historyLoading ? (
                   <div className="p-8 text-center text-muted-foreground">Loading...</div>
-                ) : visibleHistoryRecords.length === 0 ? (
+                ) : visibleHistoryRecords.length > 0 ? (
+                  <p className="text-xs text-muted-foreground px-4 pt-4">
+                    {visibleHistoryRecords.length} visit{visibleHistoryRecords.length === 1 ? "" : "s"} across {groupedAttendance().length} {groupedAttendance().length === 1 ? "person" : "people"}
+                  </p>
+                ) : null}
+                {historyLoading ? null : visibleHistoryRecords.length === 0 ? (
                   <div className="p-12 text-center text-muted-foreground">No attendance recorded in this range.</div>
                 ) : (
                   <div className="divide-y divide-admin-border/60">

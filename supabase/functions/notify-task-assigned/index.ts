@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendEmail } from "../_shared/mailer.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,19 +9,6 @@ const corsHeaders = {
 };
 
 const PLAYGROUND_LABELS: Record<string, string> = { caia_park: "Caia Park", plas_madoc: "Plas Madoc" };
-
-async function sendEmail(resendKey: string, to: string, subject: string, html: string) {
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: "WAPM <noreply@weareplasmadoc.co.uk>", to: [to], subject, html }),
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Resend error:", err);
-  }
-  return res.ok;
-}
 
 function taskEmailHtml(assigneeName: string, task: any) {
   return `
@@ -54,8 +42,9 @@ serve(async (req) => {
   const json = (body: object, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  if (!RESEND_API_KEY) return json({ error: "RESEND_API_KEY not configured" }, 500);
+  if (!Deno.env.get("GMAIL_SMTP_USER") || !Deno.env.get("GMAIL_SMTP_PASSWORD")) {
+    return json({ error: "GMAIL_SMTP_USER/GMAIL_SMTP_PASSWORD not configured" }, 500);
+  }
 
   const supabaseUrl = Deno.env.get("SUPERBASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -71,7 +60,7 @@ serve(async (req) => {
     const { data: assignee } = await supabase.from("profiles").select("full_name, email").eq("id", task.assigned_to).maybeSingle();
     if (!assignee?.email) return json({ skipped: true });
 
-    const sent = await sendEmail(RESEND_API_KEY, assignee.email, `New task: ${task.title}`, taskEmailHtml(assignee.full_name, task));
+    const sent = await sendEmail(assignee.email, `New task: ${task.title}`, taskEmailHtml(assignee.full_name, task));
     return json({ success: sent });
   } catch (err) {
     console.error("notify-task-assigned error:", err);

@@ -1183,6 +1183,63 @@ export type Database = {
           },
         ]
       }
+      donations: {
+        Row: {
+          amount_pence: number
+          created_at: string
+          currency: string
+          donor_address: string | null
+          donor_email: string | null
+          donor_first_name: string | null
+          donor_last_name: string | null
+          donor_name: string | null
+          donor_phone: string | null
+          gift_aid: boolean
+          gift_aid_claimed_at: string | null
+          id: string
+          paid_at: string | null
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          amount_pence: number
+          created_at?: string
+          currency?: string
+          donor_address?: string | null
+          donor_email?: string | null
+          donor_first_name?: string | null
+          donor_last_name?: string | null
+          donor_name?: string | null
+          donor_phone?: string | null
+          gift_aid?: boolean
+          gift_aid_claimed_at?: string | null
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          amount_pence?: number
+          created_at?: string
+          currency?: string
+          donor_address?: string | null
+          donor_email?: string | null
+          donor_first_name?: string | null
+          donor_last_name?: string | null
+          donor_name?: string | null
+          donor_phone?: string | null
+          gift_aid?: boolean
+          gift_aid_claimed_at?: string | null
+          id?: string
+          paid_at?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { ChartBarIcon, UsersIcon, BabyIcon, StudentIcon, MagnifyingGlassIcon, WarningIcon, HeartbeatIcon, ArrowRightIcon, DownloadSimpleIcon, FileXlsIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { AGE_BANDS, calculateAge, getAgeBand, formatPlayground } from "@/lib/vms";
+import { AGE_BANDS, calculateAge, getAgeBand, formatPlayground, isYouthClubAge, summarizeAttendance } from "@/lib/vms";
 import { generateListReportPdf } from "@/lib/pdf";
 import { downloadExcelWorkbook } from "@/lib/excel";
 import PlaygroundFilter, { usePlaygroundFilter } from "@/components/admin/vms/PlaygroundFilter";
@@ -105,7 +105,15 @@ export default function VmsReports() {
   const playgroundVisits = attendance.filter((a) => a.child_id && a.service === "playground").length;
   const youthVisits = attendance.filter((a) => a.child_id && a.service === "youth_club").length;
   const parentVisits = attendance.filter((a) => a.parent_id).length;
-  const totalVisits = attendance.length;
+  const { uniquePeople, totalVisits: allVisits } = summarizeAttendance(attendance.filter((a) => a.child_id));
+
+  const childDobById = useMemo(() => Object.fromEntries(children.map((c) => [c.id, c.date_of_birth])), [children]);
+  const isYouthAgeChild = (childId: string) => {
+    const dob = childDobById[childId];
+    return !!dob && isYouthClubAge(dob);
+  };
+  const youthAgePlaygroundVisits = attendance.filter((a) => a.child_id && a.service === "playground" && isYouthAgeChild(a.child_id)).length;
+  const youthAgeYouthClubVisits = attendance.filter((a) => a.child_id && a.service === "youth_club" && isYouthAgeChild(a.child_id)).length;
 
   const perChildCounts = useMemo(() => {
     const map: Record<string, { id: string; name: string; count: number }> = {};
@@ -129,8 +137,9 @@ export default function VmsReports() {
     !childSearch || c.name.toLowerCase().includes(childSearch.toLowerCase())
   );
 
-  const accidentCount = incidents.filter((i) => i.incident_type === "accident").length;
-  const medicalCount = incidents.filter((i) => i.incident_type === "medical_emergency").length;
+  const accidentCount = incidents.filter((i) => i.incident_type === "accident" && i.person_type === "child").length;
+  const medicalCount = incidents.filter((i) => i.incident_type === "medical_emergency" && i.person_type === "child").length;
+  const adultIncidentCount = incidents.filter((i) => i.person_type !== "child").length;
 
   // Every drill-down link carries the current playground scope, so the destination stays consistent.
   const playgroundParam = playgroundFilter !== "all" ? `&playground=${playgroundFilter}` : "";
@@ -145,7 +154,7 @@ export default function VmsReports() {
       rows: AGE_BANDS.map((b) => [b, ageBandCounts[b]]),
     },
     {
-      name: "Attendance", heading: `Attendance (${attendance.length})`,
+      name: "Attendance", heading: `Attendance — ${uniquePeople} ${uniquePeople === 1 ? "child" : "children"}, ${allVisits} child visits (${attendance.length} records total, including parents & volunteers below)`,
       columns: ["Name", "Type", "Service", "Date", "Playground"],
       rows: attendance.map((a: any) => [
         a.children ? `${a.children.first_name} ${a.children.last_name}` : a.parents ? `${a.parents.first_name} ${a.parents.last_name}` : "-",
@@ -156,7 +165,7 @@ export default function VmsReports() {
       ]),
     },
     {
-      name: "Incidents", heading: `Incidents (${incidents.length})`,
+      name: "Incidents", heading: `Incidents — ${accidentCount + medicalCount} involving children (${incidents.length} records total, including adults & visitors below)`,
       columns: ["Date", "Type", "Person", "Person Type", "What Happened", "Action Taken", "Parent Notified", "Follow-up"],
       rows: incidents.map((i: any) => [
         format(new Date(i.occurred_on), "d MMM yyyy"),
@@ -274,8 +283,32 @@ export default function VmsReports() {
         </div>
 
         <p className="text-xs text-muted-foreground mb-6">
-          Total visits {format(new Date(fromDate), "d MMM yyyy")} to {format(new Date(toDate), "d MMM yyyy")}: <strong className="text-foreground">{totalVisits.toLocaleString()}</strong>
+          {format(new Date(fromDate), "d MMM yyyy")} to {format(new Date(toDate), "d MMM yyyy")}: <strong className="text-foreground">{uniquePeople.toLocaleString()}</strong> {uniquePeople === 1 ? "child attended" : "children attended"} · <strong className="text-foreground">{allVisits.toLocaleString()}</strong> total child visits <span className="text-muted-foreground/70">(parent/volunteer visits shown separately above)</span>
         </p>
+
+        {/* Youth-age (10-17) attendance split by service, within the selected range */}
+        <Card className="rounded-2xl border-admin-border mb-6">
+          <CardContent className="p-6">
+            <h3 className="font-semibold text-foreground mb-1 flex items-center gap-2"><StudentIcon className="w-4 h-4" /> Youth Club Age (10-17) Attendance</h3>
+            <p className="text-xs text-muted-foreground mb-4">How youth-age children split between the two services in this range — they can attend either.</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5">
+                <BabyIcon className="w-5 h-5 text-primary shrink-0" weight="fill" />
+                <div>
+                  <p className="text-xl font-bold text-foreground">{loading ? "..." : youthAgePlaygroundVisits}</p>
+                  <p className="text-xs text-muted-foreground">Playground</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-accent/5">
+                <StudentIcon className="w-5 h-5 text-accent shrink-0" weight="fill" />
+                <div>
+                  <p className="text-xl font-bold text-foreground">{loading ? "..." : youthAgeYouthClubVisits}</p>
+                  <p className="text-xs text-muted-foreground">Youth Club</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Age band headcount (current active children, not date-ranged) */}
         <Card className="rounded-2xl border-admin-border mb-6">
@@ -300,22 +333,27 @@ export default function VmsReports() {
         <Card className="rounded-2xl border-admin-border mb-6">
           <CardContent className="p-6">
             <h3 className="font-semibold text-foreground mb-4">Incidents (selected range)</h3>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4 mb-2">
               <Link to={`/admin/vms/incidents?type=accident&${rangeParams}`} className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors">
                 <WarningIcon className="w-5 h-5 text-amber-600 shrink-0" weight="fill" />
                 <div>
                   <p className="text-xl font-bold text-foreground">{loading ? "..." : accidentCount}</p>
-                  <p className="text-xs text-muted-foreground">Accidents</p>
+                  <p className="text-xs text-muted-foreground">Accidents (children)</p>
                 </div>
               </Link>
               <Link to={`/admin/vms/incidents?type=medical_emergency&${rangeParams}`} className="flex items-center gap-3 p-3 rounded-xl bg-red-50 hover:bg-red-100 transition-colors">
                 <HeartbeatIcon className="w-5 h-5 text-red-600 shrink-0" weight="fill" />
                 <div>
                   <p className="text-xl font-bold text-foreground">{loading ? "..." : medicalCount}</p>
-                  <p className="text-xs text-muted-foreground">Medical Emergencies</p>
+                  <p className="text-xs text-muted-foreground">Medical Emergencies (children)</p>
                 </div>
               </Link>
             </div>
+            {adultIncidentCount > 0 && (
+              <p className="text-xs text-muted-foreground mb-4">
+                + <Link to={`/admin/vms/incidents?${rangeParams}`} className="underline hover:text-primary">{adultIncidentCount} involving a parent, volunteer, or visitor</Link>, shown separately from children's counts above.
+              </p>
+            )}
             {incidents.length > 0 && (
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {incidents.map((i) => {

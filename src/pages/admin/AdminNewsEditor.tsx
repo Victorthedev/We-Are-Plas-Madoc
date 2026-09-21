@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminShell from "@/components/admin/layout/AdminShell";
+import PermissionGuard from "@/components/admin/shared/PermissionGuard";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "../../integrations/superbase/client";
 import { Button } from "@/components/ui/button";
@@ -125,6 +126,7 @@ export default function AdminNewsEditor() {
 
   return (
     <AdminShell title={isNew ? "New Post" : "Edit Post"} breadcrumb={`Dashboard > News > ${isNew ? "New" : "Edit"}`}>
+      <PermissionGuard roles={["super_admin", "editor", "contributor"]}>
       <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6">
         <Button variant="ghost" onClick={goBack} className="text-primary"><ArrowLeftIcon className="w-4 h-4 mr-1" /> Back</Button>
         <div className="flex-1" />
@@ -244,6 +246,7 @@ export default function AdminNewsEditor() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </PermissionGuard>
     </AdminShell>
   );
 }
