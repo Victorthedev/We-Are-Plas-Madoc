@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { PlusIcon, TrashIcon, PencilSimpleIcon, ImageIcon, CheckIcon } from "@phosphor-icons/react";
+import { PlusIcon, TrashIcon, PencilSimpleIcon, ImageIcon, CheckIcon, HouseIcon } from "@phosphor-icons/react";
 import ImageUpload from "@/components/ui/ImageUpload";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const categories = ["events", "the-land", "homegrown", "community-pantry", "community", "general"];
+const HOME_SLOTS = 4;
 
 export default function AdminGallery() {
   const { user, profile } = useAuth();
@@ -41,7 +42,21 @@ export default function AdminGallery() {
 
   useEffect(() => { fetchItems(); }, []);
 
-  const filtered = filter === "all" ? items : items.filter(i => i.category === filter);
+  const filtered = filter === "all" ? items : filter === "home" ? items.filter(i => i.home_featured_at) : items.filter(i => i.category === filter);
+  const homeCount = items.filter(i => i.home_featured_at).length;
+
+  const toggleHome = async (item: any) => {
+    const featuring = !item.home_featured_at;
+    if (featuring && homeCount >= HOME_SLOTS) {
+      toast.error(`${HOME_SLOTS} photos are already on the home page. Remove one first.`);
+      return;
+    }
+    const value = featuring ? new Date().toISOString() : null;
+    const { error } = await supabase.from("gallery_items").update({ home_featured_at: value }).eq("id", item.id);
+    if (error) { toast.error("Couldn't update the home page photos"); return; }
+    setItems(prev => prev.map(i => (i.id === item.id ? { ...i, home_featured_at: value } : i)));
+    toast.success(featuring ? "Added to home page" : "Removed from home page");
+  };
 
   const toggleSelect = (id: string) => {
     const s = new Set(selected);
@@ -104,11 +119,13 @@ export default function AdminGallery() {
       <PermissionGuard roles={["super_admin", "editor", "contributor", "gallery_only"]}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex gap-2 flex-wrap">
-            {["all", ...categories].map(c => (
+            {["all", "home", ...categories].map(c => (
               <button key={c} onClick={() => setFilter(c)}
-                className={cn("px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors border",
+                className={cn("px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors border inline-flex items-center gap-1.5",
                   filter === c ? "bg-primary text-primary-foreground border-primary" : "bg-card text-primary border-primary/20"
-                )}>{c}</button>
+                )}>
+                {c === "home" ? <><HouseIcon className="w-3.5 h-3.5" weight="fill" /> Home page ({homeCount}/{HOME_SLOTS})</> : c}
+              </button>
             ))}
           </div>
           <Button onClick={() => setShowUpload(true)} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
@@ -148,6 +165,19 @@ export default function AdminGallery() {
                   aria-label={selected.has(item.id) ? "Deselect photo" : "Select photo"}
                 >
                   {selected.has(item.id) && <CheckIcon className="w-4 h-4 text-white" weight="bold" />}
+                </button>
+
+                <button
+                  onClick={() => toggleHome(item)}
+                  className={cn(
+                    "absolute top-2 right-2 h-7 rounded-full flex items-center gap-1 px-2.5 text-xs font-medium shadow-sm transition-colors",
+                    item.home_featured_at ? "bg-primary text-primary-foreground" : "bg-white/85 text-foreground hover:bg-white"
+                  )}
+                  aria-label={item.home_featured_at ? "Remove from home page" : "Show on home page"}
+                  title={item.home_featured_at ? "Remove from home page" : "Show on home page"}
+                >
+                  <HouseIcon className="w-3.5 h-3.5" weight={item.home_featured_at ? "fill" : "regular"} />
+                  {item.home_featured_at ? "On home" : "Home"}
                 </button>
 
                 {/* Edit/delete: always visible, not hover-gated */}
