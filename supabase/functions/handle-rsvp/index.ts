@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import "https://deno.land/std@0.208.0/dotenv/load.ts";
 import { sendEmail } from "../_shared/mailer.ts";
+import { SITE_URL } from "../_shared/email/layout.ts";
+import { rsvpCancelled, rsvpConfirmed, rsvpStaff, STAFF_CC, STAFF_INBOX } from "../_shared/email/templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,93 +25,6 @@ function generateCalendarLinks(event: any) {
   return { google, apple };
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-}
-
-function formatTime(dateStr: string) {
-  return new Date(dateStr).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-}
-
-function confirmationEmailHtml(rsvp: any, event: any, calLinks: any, cancelUrl: string) {
-  return `
-<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:'Poppins',Helvetica,Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;">
-  <div style="background:#7B2D8E;padding:32px;text-align:center;">
-    <h1 style="color:#fff;font-size:24px;margin:0;">🌂 WAPM</h1>
-    <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:4px 0 0;">We Are Plas Madoc</p>
-  </div>
-  <div style="padding:32px;background:#ffffff;">
-    <p style="color:#2D1B4E;font-size:16px;">Hi ${rsvp.first_name},</p>
-    <p style="color:#555;font-size:14px;line-height:1.6;">You're all set! Here are the event details:</p>
-    <div style="background:#F5F0FF;border-radius:12px;padding:24px;margin:24px 0;">
-      <h2 style="color:#7B2D8E;font-size:20px;margin:0 0 12px;">${event.title}</h2>
-      <p style="color:#555;font-size:14px;margin:4px 0;">📅 ${formatDate(event.start_datetime)}</p>
-      <p style="color:#555;font-size:14px;margin:4px 0;">🕐 ${formatTime(event.start_datetime)}</p>
-      ${event.location ? `<p style="color:#555;font-size:14px;margin:4px 0;">📍 ${event.location}</p>` : ""}
-      <p style="color:#555;font-size:14px;margin:12px 0 0;">You and your crew😎: <strong>${rsvp.party_size}</strong></p>
-    </div>
-    <div style="text-align:center;margin:24px 0;">
-      <a href="${calLinks.google}" target="_blank" style="display:inline-block;background:#7B2D8E;color:#fff;padding:10px 24px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;margin:4px;">Add to Google Calendar</a>
-      <a href="${calLinks.apple}" target="_blank" style="display:inline-block;background:#2D1B4E;color:#fff;padding:10px 24px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;margin:4px;">Add to Apple Calendar</a>
-    </div>
-    <p style="color:#999;font-size:13px;text-align:center;margin-top:32px;">Can't make it anymore? <a href="${cancelUrl}" style="color:#7B2D8E;">Cancel your RSVP</a></p>
-  </div>
-  <div style="background:#F5F0FF;padding:24px;text-align:center;">
-    <p style="color:#999;font-size:11px;margin:0;">We Are Plas Madoc (WAPM) · CIO Charity No. 1197278</p>
-    <p style="color:#999;font-size:11px;margin:4px 0 0;">The Opportunities Centre, Plas Madoc, Wrexham, LL14 3US</p>
-  </div>
-</div>
-</body></html>`;
-}
-
-function staffNotificationHtml(rsvp: any, event: any, totalRsvps: number) {
-  return `
-<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:'Poppins',Helvetica,Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;">
-  <div style="background:#7B2D8E;padding:24px;text-align:center;">
-    <h1 style="color:#fff;font-size:20px;margin:0;">New RSVP Received</h1>
-  </div>
-  <div style="padding:32px;background:#ffffff;">
-    <div style="background:#F5F0FF;border-radius:12px;padding:20px;margin-bottom:20px;">
-      <p style="color:#2D1B4E;font-size:14px;margin:4px 0;"><strong>Name:</strong> ${rsvp.first_name} ${rsvp.last_name}</p>
-      <p style="color:#2D1B4E;font-size:14px;margin:4px 0;"><strong>Email:</strong> ${rsvp.email}</p>
-      ${rsvp.phone ? `<p style="color:#2D1B4E;font-size:14px;margin:4px 0;"><strong>Phone:</strong> ${rsvp.phone}</p>` : ""}
-      <p style="color:#2D1B4E;font-size:14px;margin:4px 0;"><strong>Party Size:</strong> ${rsvp.party_size}</p>
-    </div>
-    <p style="color:#555;font-size:14px;"><strong>Event:</strong> ${event.title}</p>
-    <p style="color:#555;font-size:14px;"><strong>Date:</strong> ${formatDate(event.start_datetime)}</p>
-    <p style="color:#7B2D8E;font-size:16px;font-weight:600;margin-top:16px;">Total RSVPs so far: ${totalRsvps}</p>
-  </div>
-</div>
-</body></html>`;
-}
-
-function cancellationAckHtml(firstName: string, eventTitle: string) {
-  return `
-<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:'Poppins',Helvetica,Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;">
-  <div style="background:#7B2D8E;padding:24px;text-align:center;">
-    <h1 style="color:#fff;font-size:20px;margin:0;">🌂 WAPM</h1>
-  </div>
-  <div style="padding:32px;background:#ffffff;">
-    <p style="color:#2D1B4E;font-size:16px;">Hi ${firstName},</p>
-    <p style="color:#555;font-size:14px;line-height:1.6;">Your RSVP for <strong>${eventTitle}</strong> has been cancelled.</p>
-    <p style="color:#555;font-size:14px;line-height:1.6;">We hope to see you at a future event!</p>
-    <div style="text-align:center;margin-top:24px;">
-      <a href="https://weareplasmadoc.co.uk/events" style="display:inline-block;background:#7B2D8E;color:#fff;padding:10px 24px;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;">Browse Events</a>
-    </div>
-  </div>
-  <div style="background:#F5F0FF;padding:24px;text-align:center;">
-    <p style="color:#999;font-size:11px;margin:0;">We Are Plas Madoc (WAPM) · CIO Charity No. 1197278</p>
-  </div>
-</div>
-</body></html>`;
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -127,7 +42,6 @@ serve(async (req) => {
     if (action === "submit") {
       const { event_id, first_name, last_name, email, phone, party_size } = body;
 
-      // Check for duplicate
       const { data: existing } = await supabase
         .from("event_rsvps")
         .select("id")
@@ -139,11 +53,9 @@ serve(async (req) => {
         return new Response(JSON.stringify({ duplicate: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      // Get event details
       const { data: event } = await supabase.from("events").select("*").eq("id", event_id).single();
       if (!event) return new Response(JSON.stringify({ error: "Event not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-      // Insert RSVP
       const { data: rsvp, error } = await supabase
         .from("event_rsvps")
         .insert({ event_id, first_name, last_name: last_name || "", email, phone: phone || null, party_size: party_size || 1 })
@@ -152,22 +64,34 @@ serve(async (req) => {
 
       if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-      const cancelUrl = `https://weareplasmadoc.co.uk/events/cancel-rsvp?token=${rsvp.cancellation_token}`;
+      const cancelUrl = `${SITE_URL}/events/cancel-rsvp?token=${rsvp.cancellation_token}`;
       const calLinks = generateCalendarLinks(event);
 
-      // Send confirmation to attendee
-      await sendEmail(email, `We're glad you're coming for ${event.title}! 🎉`, confirmationEmailHtml(rsvp, event, calLinks, cancelUrl));
+      const confirmation = rsvpConfirmed({
+        first_name: rsvp.first_name,
+        party_size: rsvp.party_size,
+        eventTitle: event.title,
+        eventStart: event.start_datetime,
+        location: event.location,
+        googleCalendarUrl: calLinks.google,
+        appleCalendarUrl: calLinks.apple,
+        cancelUrl,
+      });
+      await sendEmail(email, confirmation.subject, confirmation.html, { replyTo: STAFF_INBOX });
 
-      // Get total RSVP count
       const { count } = await supabase.from("event_rsvps").select("*", { count: "exact", head: true }).eq("event_id", event_id);
 
-      // Send notification to staff
-      await sendEmail(
-        "claire.pugh@avow.org",
-        `New RSVP — ${event.title} — ${first_name} ${last_name || ""}`,
-        staffNotificationHtml(rsvp, event, count || 1),
-        { cc: ["katie.st.john@avow.org"] }
-      );
+      const staff = rsvpStaff({
+        first_name: rsvp.first_name,
+        last_name: rsvp.last_name,
+        email: rsvp.email,
+        phone: rsvp.phone,
+        party_size: rsvp.party_size,
+        eventTitle: event.title,
+        eventStart: event.start_datetime,
+        totalRsvps: count || 1,
+      });
+      await sendEmail(STAFF_INBOX, staff.subject, staff.html, { cc: STAFF_CC, replyTo: email });
 
       return new Response(JSON.stringify({ success: true, rsvp_id: rsvp.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -186,7 +110,8 @@ serve(async (req) => {
       const eventTitle = (rsvp as any).events?.title || "the event";
 
       await supabase.from("event_rsvps").delete().eq("id", rsvp.id);
-      await sendEmail(rsvp.email, `RSVP Cancelled — ${eventTitle}`, cancellationAckHtml(rsvp.first_name, eventTitle));
+      const ack = rsvpCancelled({ first_name: rsvp.first_name, eventTitle });
+      await sendEmail(rsvp.email, ack.subject, ack.html, { replyTo: STAFF_INBOX });
 
       return new Response(JSON.stringify({ success: true, event_title: eventTitle, first_name: rsvp.first_name }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }

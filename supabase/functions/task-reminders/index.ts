@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/mailer.ts";
+import { taskReminder } from "../_shared/email/templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,34 +9,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PLAYGROUND_LABELS: Record<string, string> = { caia_park: "Caia Park", plas_madoc: "Plas Madoc" };
 const REMINDER_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000;
-
-function reminderEmailHtml(assigneeName: string, task: any) {
-  return `
-<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:'Poppins',Helvetica,Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;">
-  <div style="background:#7B2D8E;padding:32px;text-align:center;">
-    <h1 style="color:#fff;font-size:24px;margin:0;">WAPM</h1>
-    <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:4px 0 0;">We Are Plas Madoc</p>
-  </div>
-  <div style="padding:32px;background:#ffffff;">
-    <p style="color:#2D1B4E;font-size:16px;">Hi ${assigneeName}, just a reminder...</p>
-    <p style="color:#555;font-size:14px;line-height:1.6;">This task is still open on the Daily Log:</p>
-    <div style="background:#F5F0FF;border-radius:12px;padding:24px;margin:24px 0;">
-      <h2 style="color:#7B2D8E;font-size:18px;margin:0 0 8px;">${task.title}</h2>
-      ${task.description ? `<p style="color:#555;font-size:14px;margin:8px 0;">${task.description}</p>` : ""}
-      ${task.playground ? `<p style="color:#999;font-size:13px;margin:8px 0 0;">${PLAYGROUND_LABELS[task.playground] || task.playground}</p>` : ""}
-    </div>
-    <p style="color:#555;font-size:14px;">Sign in and open Daily Log &gt; Tasks to update it once it's done.</p>
-  </div>
-  <div style="background:#F5F0FF;padding:24px;text-align:center;">
-    <p style="color:#999;font-size:11px;margin:0;">We Are Plas Madoc (WAPM) &middot; CIO Charity No. 1197278</p>
-  </div>
-</div>
-</body></html>`;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -69,7 +43,8 @@ serve(async (req) => {
       const { data: assignee } = await supabase.from("profiles").select("full_name, email").eq("id", task.assigned_to).maybeSingle();
       if (!assignee?.email) continue;
 
-      const ok = await sendEmail(assignee.email, `Reminder: ${task.title}`, reminderEmailHtml(assignee.full_name, task));
+      const email = taskReminder({ assigneeName: assignee.full_name, title: task.title, description: task.description, playground: task.playground });
+      const ok = await sendEmail(assignee.email, email.subject, email.html);
       if (ok) {
         await supabase.from("vms_tasks").update({ last_reminded_at: new Date().toISOString() }).eq("id", task.id);
         sent++;

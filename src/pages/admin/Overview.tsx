@@ -24,7 +24,7 @@ export default function AdminOverview() {
       const [news, newsDrafts, events, eventDrafts, gallery, unread, total, activity] = await Promise.all([
         supabase.from("news_posts").select("id", { count: "exact", head: true }).eq("status", "published"),
         supabase.from("news_posts").select("id", { count: "exact", head: true }).eq("status", "draft"),
-        supabase.from("events").select("id", { count: "exact", head: true }).eq("status", "published"),
+        supabase.from("events").select("id", { count: "exact", head: true }).eq("status", "published").gte("start_datetime", new Date().toISOString()),
         supabase.from("events").select("id", { count: "exact", head: true }).eq("status", "draft"),
         supabase.from("gallery_items").select("id", { count: "exact", head: true }),
         supabase.from("messages").select("id", { count: "exact", head: true }).eq("read", false),
