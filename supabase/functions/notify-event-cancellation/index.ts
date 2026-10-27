@@ -1,37 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/mailer.ts";
+import { eventCancelled, STAFF_INBOX } from "../_shared/email/templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-function cancellationHtml(firstName: string, eventTitle: string) {
-  return `
-<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:'Poppins',Helvetica,Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;">
-  <div style="background:#7B2D8E;padding:32px;text-align:center;">
-    <h1 style="color:#fff;font-size:24px;margin:0;">🌂 WAPM</h1>
-    <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:4px 0 0;">We Are Plas Madoc</p>
-  </div>
-  <div style="padding:32px;background:#ffffff;">
-    <p style="color:#2D1B4E;font-size:16px;">Hi ${firstName},</p>
-    <p style="color:#555;font-size:14px;line-height:1.6;">Unfortunately <strong>${eventTitle}</strong> has been cancelled.</p>
-    <p style="color:#555;font-size:14px;line-height:1.6;">We're sorry for any inconvenience.</p>
-    <p style="color:#555;font-size:14px;line-height:1.6;">Keep an eye on our website for future events:</p>
-    <div style="text-align:center;margin:24px 0;">
-      <a href="https://weareplasmadoc.co.uk/events" style="display:inline-block;background:#7B2D8E;color:#fff;padding:12px 28px;border-radius:999px;text-decoration:none;font-size:14px;font-weight:600;">Browse Upcoming Events</a>
-    </div>
-  </div>
-  <div style="background:#F5F0FF;padding:24px;text-align:center;">
-    <p style="color:#999;font-size:11px;margin:0;">We Are Plas Madoc (WAPM) · CIO Charity No. 1197278</p>
-  </div>
-</div>
-</body></html>`;
-}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -54,7 +30,8 @@ serve(async (req) => {
 
     let sentCount = 0;
     for (const rsvp of rsvps || []) {
-      const ok = await sendEmail(rsvp.email, `Important update about ${event.title}`, cancellationHtml(rsvp.first_name, event.title));
+      const email = eventCancelled({ first_name: rsvp.first_name, eventTitle: event.title });
+      const ok = await sendEmail(rsvp.email, email.subject, email.html, { replyTo: STAFF_INBOX });
       if (ok) sentCount++;
     }
 

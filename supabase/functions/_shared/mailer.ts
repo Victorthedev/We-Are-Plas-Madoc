@@ -34,7 +34,9 @@ export async function sendEmail(to: string, subject: string, html: string, optio
       ...(options?.cc ? { cc: options.cc } : {}),
       ...(options?.replyTo ? { replyTo: options.replyTo } : {}),
       subject,
-      html,
+      // denomailer's quoted-printable encoder leaks a literal "=20" for lines
+      // that end in whitespace, so strip trailing whitespace before sending.
+      html: html.replace(/[ \t]+$/gm, ""),
       content: "text/html",
     });
     return true;
@@ -42,7 +44,8 @@ export async function sendEmail(to: string, subject: string, html: string, optio
     console.error("Gmail SMTP error:", err);
     return false;
   } finally {
-    // close() throws if the connection never opened; don't let that mask the real error.
-    await client.close().catch(() => {});
+    // close() throws if the connection never opened (and isn't always a promise);
+    // don't let cleanup mask the real result.
+    try { await client.close(); } catch { /* ignore */ }
   }
 }
