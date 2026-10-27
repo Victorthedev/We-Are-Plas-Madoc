@@ -157,6 +157,7 @@ export type Database = {
           category: string | null
           created_at: string
           display_order: number | null
+          home_featured_at: string | null
           id: string
           image_url: string
           uploaded_by: string | null
@@ -166,6 +167,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           display_order?: number | null
+          home_featured_at?: string | null
           id?: string
           image_url: string
           uploaded_by?: string | null
@@ -175,6 +177,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           display_order?: number | null
+          home_featured_at?: string | null
           id?: string
           image_url?: string
           uploaded_by?: string | null

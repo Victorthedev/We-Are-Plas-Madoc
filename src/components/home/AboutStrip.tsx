@@ -19,12 +19,26 @@ export default function AboutStrip() {
   const [photos, setPhotos] = useState<GalleryItem[]>([]);
 
   useEffect(() => {
-    supabase
-      .from("gallery_items")
-      .select("id, image_url, caption")
-      .order("created_at", { ascending: false })
-      .limit(4)
-      .then(({ data }) => setPhotos(data || []));
+    const load = async () => {
+      const { data: featured } = await supabase
+        .from("gallery_items")
+        .select("id, image_url, caption")
+        .not("home_featured_at", "is", null)
+        .order("home_featured_at", { ascending: false })
+        .limit(4);
+      const picked = featured || [];
+      if (picked.length >= 4) { setPhotos(picked); return; }
+
+      // Fewer than 4 picked by staff: top up with the latest uploads.
+      const { data: latest } = await supabase
+        .from("gallery_items")
+        .select("id, image_url, caption")
+        .is("home_featured_at", null)
+        .order("created_at", { ascending: false })
+        .limit(4 - picked.length);
+      setPhotos([...picked, ...(latest || [])]);
+    };
+    load();
   }, []);
 
   return (
