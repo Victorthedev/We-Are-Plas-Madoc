@@ -1240,11 +1240,475 @@ export type Database = {
         }
         Relationships: []
       }
+      transport_settings: {
+        Row: {
+          base_fare_pence: number
+          booking_horizon_days: number
+          cancel_cutoff_minutes: number
+          id: boolean
+          min_notice_minutes: number
+          monthly_discount_pct: number
+          monthly_price_pence: number
+          updated_at: string
+          yearly_discount_pct: number
+          yearly_price_pence: number
+        }
+        Insert: {
+          base_fare_pence?: number
+          booking_horizon_days?: number
+          cancel_cutoff_minutes?: number
+          id?: boolean
+          min_notice_minutes?: number
+          monthly_discount_pct?: number
+          monthly_price_pence?: number
+          updated_at?: string
+          yearly_discount_pct?: number
+          yearly_price_pence?: number
+        }
+        Update: {
+          base_fare_pence?: number
+          booking_horizon_days?: number
+          cancel_cutoff_minutes?: number
+          id?: boolean
+          min_notice_minutes?: number
+          monthly_discount_pct?: number
+          monthly_price_pence?: number
+          updated_at?: string
+          yearly_discount_pct?: number
+          yearly_price_pence?: number
+        }
+        Relationships: []
+      }
+      transport_slots: {
+        Row: {
+          active: boolean
+          created_at: string
+          end_time: string
+          id: string
+          start_time: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          end_time: string
+          id?: string
+          start_time: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          registration: string | null
+          seats: number | null
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          registration?: string | null
+          seats?: number | null
+          updated_at?: string
+          vehicle_type: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          registration?: string | null
+          seats?: number | null
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
+      vehicle_unavailability: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string
+          id: string
+          reason: string | null
+          start_date: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          id?: string
+          reason?: string | null
+          start_date: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          reason?: string | null
+          start_date?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_unavailability_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_availability: {
+        Row: {
+          avail_date: string
+          created_at: string
+          driver_id: string
+          id: string
+          slot_id: string
+        }
+        Insert: {
+          avail_date: string
+          created_at?: string
+          driver_id: string
+          id?: string
+          slot_id: string
+        }
+        Update: {
+          avail_date?: string
+          created_at?: string
+          driver_id?: string
+          id?: string
+          slot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_availability_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "transport_slots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_bookings: {
+        Row: {
+          booking_date: string
+          created_at: string
+          driver_id: string
+          hold_expires_at: string | null
+          id: string
+          leg: string | null
+          slot_id: string
+          starts_at: string | null
+          status: string
+          trip_id: string | null
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          booking_date: string
+          created_at?: string
+          driver_id: string
+          hold_expires_at?: string | null
+          id?: string
+          leg?: string | null
+          slot_id: string
+          starts_at?: string | null
+          status?: string
+          trip_id?: string | null
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          booking_date?: string
+          created_at?: string
+          driver_id?: string
+          hold_expires_at?: string | null
+          id?: string
+          leg?: string | null
+          slot_id?: string
+          starts_at?: string | null
+          status?: string
+          trip_id?: string | null
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_bookings_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "transport_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_bookings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "transport_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      members: {
+        Row: {
+          address: string | null
+          cancel_at_period_end: boolean
+          created_at: string
+          created_by: string | null
+          current_period_end: string
+          email: string
+          full_name: string
+          id: string
+          manage_token: string
+          member_number: string
+          notes: string | null
+          phone: string | null
+          plan: string
+          postcode: string
+          source: string
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          created_by?: string | null
+          current_period_end: string
+          email: string
+          full_name: string
+          id?: string
+          manage_token?: string
+          member_number?: string
+          notes?: string | null
+          phone?: string | null
+          plan: string
+          postcode: string
+          source?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          cancel_at_period_end?: boolean
+          created_at?: string
+          created_by?: string | null
+          current_period_end?: string
+          email?: string
+          full_name?: string
+          id?: string
+          manage_token?: string
+          member_number?: string
+          notes?: string | null
+          phone?: string | null
+          plan?: string
+          postcode?: string
+          source?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transport_trips: {
+        Row: {
+          amount_pence: number
+          cancel_token: string
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          discount_pct: number
+          dropoff_address: string
+          dropoff_postcode: string
+          fare_pence: number
+          hold_expires_at: string | null
+          id: string
+          is_return: boolean
+          member_id: string | null
+          notes: string | null
+          paid_at: string | null
+          passenger_email: string
+          passenger_name: string
+          passenger_phone: string
+          pickup_address: string
+          pickup_postcode: string
+          reference: string
+          refunded_pence: number | null
+          site_origin: string | null
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_refund_id: string | null
+          trip_date: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          amount_pence: number
+          cancel_token?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          discount_pct?: number
+          dropoff_address: string
+          dropoff_postcode: string
+          fare_pence: number
+          hold_expires_at?: string | null
+          id?: string
+          is_return?: boolean
+          member_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          passenger_email: string
+          passenger_name: string
+          passenger_phone: string
+          pickup_address: string
+          pickup_postcode: string
+          reference: string
+          refunded_pence?: number | null
+          site_origin?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
+          trip_date: string
+          updated_at?: string
+          vehicle_type: string
+        }
+        Update: {
+          amount_pence?: number
+          cancel_token?: string
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          discount_pct?: number
+          dropoff_address?: string
+          dropoff_postcode?: string
+          fare_pence?: number
+          hold_expires_at?: string | null
+          id?: string
+          is_return?: boolean
+          member_id?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          passenger_email?: string
+          passenger_name?: string
+          passenger_phone?: string
+          pickup_address?: string
+          pickup_postcode?: string
+          reference?: string
+          refunded_pence?: number | null
+          site_origin?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_refund_id?: string | null
+          trip_date?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_trips_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transport_rate_limits: {
+        Row: {
+          bucket: string
+          created_at: string
+          id: number
+          key: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string
+          id?: number
+          key: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string
+          id?: number
+          key?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      generate_member_number: { Args: never; Returns: string }
+      get_transport_availability: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          end_time: string
+          free_drivers: number
+          free_vehicles: number
+          is_open: boolean
+          slot_date: string
+          slot_id: string
+          start_time: string
+          vehicle_type: string
+        }[]
+      }
+      transport_hold_trip: {
+        Args: {
+          _hold_until: string
+          _return_slot_id: string
+          _slot_id: string
+          _trip: Json
+        }
+        Returns: {
+          cancel_token: string
+          reference: string
+          trip_id: string
+        }[]
+      }
+      transport_set_trip_status: {
+        Args: { _status: string; _trip_id: string }
+        Returns: undefined
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -1262,7 +1726,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "super_admin" | "editor" | "contributor" | "gallery_only" | "playground_worker"
+      app_role: "super_admin" | "editor" | "contributor" | "gallery_only" | "playground_worker" | "driver"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1390,7 +1854,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["super_admin", "editor", "contributor", "gallery_only", "playground_worker"],
+      app_role: ["super_admin", "editor", "contributor", "gallery_only", "playground_worker", "driver"],
     },
   },
 } as const

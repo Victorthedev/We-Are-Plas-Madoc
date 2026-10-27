@@ -6,7 +6,8 @@ import {
   SquaresFourIcon, NewspaperIcon, CalendarBlankIcon, ImageIcon, UsersIcon, ChatCircleIcon,
   BriefcaseIcon, UserGearIcon, GearIcon, SignOutIcon, CaretLeftIcon, CaretRightIcon, HandshakeIcon, ClipboardTextIcon, ChartBarIcon,
   BabyIcon, UserListIcon, CheckSquareIcon, StudentIcon, ChartLineIcon, FirstAidKitIcon, IdentificationBadgeIcon,
-  GaugeIcon, BellIcon, ListChecksIcon, ClockCounterClockwiseIcon, KanbanIcon, ClipboardIcon, HeartStraightIcon
+  GaugeIcon, BellIcon, ListChecksIcon, ClockCounterClockwiseIcon, KanbanIcon, ClipboardIcon, HeartStraightIcon,
+  CarIcon, CalendarCheckIcon, CalendarDotsIcon, TicketIcon, IdentificationCardIcon
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,14 @@ const checksNavItems = [
   { icon: ClipboardIcon, label: "Checklist Items", path: "/admin/checks/items", roles: ["super_admin"] },
 ];
 
+const transportNavItems = [
+  { icon: CalendarDotsIcon, label: "Overview", path: "/admin/transport", roles: ["super_admin"] },
+  { icon: TicketIcon, label: "Bookings", path: "/admin/transport/bookings", roles: ["super_admin", "driver"] },
+  { icon: IdentificationCardIcon, label: "Members", path: "/admin/transport/members", roles: ["super_admin"] },
+  { icon: CarIcon, label: "Fleet", path: "/admin/transport/fleet", roles: ["super_admin"] },
+  { icon: CalendarCheckIcon, label: "Driver Availability", path: "/admin/transport/my-availability", roles: ["super_admin", "driver"] },
+];
+
 const bottomItems = [
   { icon: HeartStraightIcon, label: "Donations", path: "/admin/donations", roles: ["super_admin"] },
   { icon: UserGearIcon, label: "Staff Accounts", path: "/admin/staff", roles: ["super_admin"] },
@@ -55,6 +64,7 @@ const roleBadge: Record<string, { label: string; className: string }> = {
   contributor: { label: "Contributor", className: "bg-wapm-green/20 text-white" },
   gallery_only: { label: "Gallery", className: "bg-wapm-pink/20 text-white" },
   playground_worker: { label: "Playground Worker", className: "bg-wapm-cyan/20 text-white" },
+  driver: { label: "Driver", className: "bg-wapm-green/20 text-white" },
 };
 
 // Every admin page mounts its own AdminSidebar (routes aren't nested under a
@@ -80,7 +90,7 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
       .then(({ count }) => setMyOpenTasks(count || 0));
   }, [user]);
 
-  const isActive = (path: string) => ["/admin", "/admin/vms", "/admin/checks"].includes(path) ? pathname === path : pathname.startsWith(path);
+  const isActive = (path: string) => ["/admin", "/admin/vms", "/admin/checks", "/admin/transport"].includes(path) ? pathname === path : pathname.startsWith(path);
 
   const renderItem = (item: typeof navItems[0], badge?: number) => {
     if (!hasPermission(item.roles as any)) return null;
@@ -149,6 +159,13 @@ export default function AdminSidebar({ collapsed, onToggle }: { collapsed: boole
             <div className="border-t border-admin-chrome-border my-4 mx-4" />
             {!collapsed && <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/30">Daily Log</p>}
             <ul className="space-y-1 px-2">{checksNavItems.map((item) => renderItem(item, item.label === "Tasks" ? myOpenTasks : undefined))}</ul>
+          </>
+        )}
+        {hasPermission(["driver"]) && (
+          <>
+            <div className="border-t border-admin-chrome-border my-4 mx-4" />
+            {!collapsed && <p className="px-4 mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/30">Transport</p>}
+            <ul className="space-y-1 px-2">{transportNavItems.map((item) => renderItem(item))}</ul>
           </>
         )}
         <div className="border-t border-admin-chrome-border my-4 mx-4" />

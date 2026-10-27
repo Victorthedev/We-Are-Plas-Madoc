@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import AdminShell from "@/components/admin/layout/AdminShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "../../integrations/superbase/client";
@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { NewspaperIcon, CalendarBlankIcon, ImageIcon, ChatCircleIcon, ArrowRightIcon } from "@phosphor-icons/react";
 
 export default function AdminOverview() {
-  const { profile } = useAuth();
+  const { profile, roles } = useAuth();
   const [stats, setStats] = useState({ news: 0, newsDrafts: 0, events: 0, eventDrafts: 0, gallery: 0, galleryCategories: 0, unreadMessages: 0, totalMessages: 0 });
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +59,9 @@ export default function AdminOverview() {
     if (hrs < 24) return `${hrs}h ago`;
     return `${Math.floor(hrs / 24)}d ago`;
   };
+
+  // Drivers have nothing to do on the content dashboard; send them to their availability.
+  if (roles.length > 0 && roles.every((r) => r === "driver")) return <Navigate to="/admin/transport/my-availability" replace />;
 
   return (
     <AdminShell title={`${getGreeting()}, ${profile?.full_name?.split(" ")[0] || "there"}`} breadcrumb={new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}>

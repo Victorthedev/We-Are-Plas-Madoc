@@ -32,3 +32,21 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.transport-address-lookup]
+verify_jwt = false
+
+[functions.transport-member]
+verify_jwt = false
+
+[functions.create-transport-checkout]
+verify_jwt = false
+
+[functions.transport-booking]
+verify_jwt = false
+
+[functions.create-membership-checkout]
+verify_jwt = false
+
+[functions.membership]
+verify_jwt = false

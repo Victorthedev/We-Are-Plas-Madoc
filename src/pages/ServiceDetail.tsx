@@ -92,7 +92,10 @@ export default function ServiceDetail() {
                   {service.contact_info && (
                     <p className="text-sm text-muted-foreground mb-4">{service.contact_info}</p>
                   )}
-                  <Link to="/contact" className="btn-primary text-sm w-full text-center block">Get In Touch</Link>
+                  {service.slug === "community-transport" && (
+                    <Link to="/transport" className="btn-primary text-sm w-full text-center block mb-3">Book Transport</Link>
+                  )}
+                  <Link to="/contact" className={service.slug === "community-transport" ? "btn-outline-primary text-sm w-full text-center block" : "btn-primary text-sm w-full text-center block"}>Get In Touch</Link>
                 </div>
               </div>
             </div>

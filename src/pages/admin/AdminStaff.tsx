@@ -15,13 +15,14 @@ import type { Database } from "@/integrations/superbase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
-const ALL_ROLES = ["editor", "contributor", "gallery_only", "playground_worker"] as const satisfies readonly AppRole[];
+const ALL_ROLES = ["editor", "contributor", "gallery_only", "playground_worker", "driver"] as const satisfies readonly AppRole[];
 
 const roleDescriptions: Record<string, string> = {
   editor: "Can publish and manage all content",
   contributor: "Can create content but cannot publish",
   gallery_only: "Can only manage gallery photos",
   playground_worker: "Access to the Visitor Management System (children, parents, attendance)",
+  driver: "Community transport driver: sets their own availability and receives booking emails",
 };
 
 const roleBadge: Record<string, { label: string; className: string }> = {
@@ -30,6 +31,7 @@ const roleBadge: Record<string, { label: string; className: string }> = {
   contributor: { label: "Contributor", className: "bg-accent text-accent-foreground" },
   gallery_only: { label: "Gallery", className: "bg-wapm-pink text-white" },
   playground_worker: { label: "Playground Worker", className: "bg-wapm-cyan text-white" },
+  driver: { label: "Driver", className: "bg-wapm-green text-white" },
 };
 
 export default function AdminStaff() {

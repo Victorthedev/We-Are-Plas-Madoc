@@ -22,6 +22,10 @@ import Contact from "./pages/Contact";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
 import CancelRsvp from "./pages/CancelRsvp";
+import BookTransport from "./pages/BookTransport";
+import ManageTransportBooking from "./pages/ManageTransportBooking";
+import Membership from "./pages/Membership";
+import ManageMembership from "./pages/ManageMembership";
 
 // Admin pages
 import AdminLogin from "./pages/admin/Login";
@@ -67,6 +71,11 @@ import ChecksLog from "./pages/admin/checks/ChecksLog";
 import ChecksHistory from "./pages/admin/checks/ChecksHistory";
 import ChecklistItems from "./pages/admin/checks/ChecklistItems";
 import Tasks from "./pages/admin/checks/Tasks";
+import TransportFleet from "./pages/admin/transport/Fleet";
+import TransportAvailability from "./pages/admin/transport/Availability";
+import TransportMyAvailability from "./pages/admin/transport/MyAvailability";
+import TransportBookings from "./pages/admin/transport/Bookings";
+import TransportMembers from "./pages/admin/transport/Members";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +122,10 @@ const App = () => (
             <Route path="/team" element={<PublicLayout><Team /></PublicLayout>} />
             <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
             <Route path="/donate" element={<PublicLayout><Donate /></PublicLayout>} />
+            <Route path="/transport" element={<PublicLayout><BookTransport /></PublicLayout>} />
+            <Route path="/transport/manage" element={<PublicLayout><ManageTransportBooking /></PublicLayout>} />
+            <Route path="/membership" element={<PublicLayout><Membership /></PublicLayout>} />
+            <Route path="/membership/manage" element={<PublicLayout><ManageMembership /></PublicLayout>} />
 
             {/* Admin auth routes (no shell) */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -165,6 +178,13 @@ const App = () => (
             <Route path="/admin/checks/tasks" element={<Tasks />} />
             <Route path="/admin/checks/items" element={<ChecklistItems />} />
             <Route path="/admin/checks/log/:id" element={<ChecksLog />} />
+
+            {/* Community transport */}
+            <Route path="/admin/transport" element={<TransportAvailability />} />
+            <Route path="/admin/transport/fleet" element={<TransportFleet />} />
+            <Route path="/admin/transport/my-availability" element={<TransportMyAvailability />} />
+            <Route path="/admin/transport/bookings" element={<TransportBookings />} />
+            <Route path="/admin/transport/members" element={<TransportMembers />} />
 
             <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
           </Routes>

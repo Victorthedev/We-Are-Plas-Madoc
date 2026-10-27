@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import WAPMLogo from "./WAPMLogo";
-import { ListIcon, XIcon, CaretDownIcon, CarIcon, TreeIcon, CoffeeIcon, PlantIcon, ShoppingCartIcon, BookOpenIcon, UsersIcon } from "@phosphor-icons/react";
+import { ListIcon, XIcon, CaretDownIcon, CarIcon, CalendarCheckIcon, IdentificationCardIcon, TreeIcon, CoffeeIcon, PlantIcon, ShoppingCartIcon, BookOpenIcon, UsersIcon } from "@phosphor-icons/react";
 
 const serviceLinks = [
   { label: "Community Transport", to: "/services/community-transport", icon: CarIcon },
+  { label: "Book Transport", to: "/transport", icon: CalendarCheckIcon },
+  { label: "Transport Membership", to: "/membership", icon: IdentificationCardIcon },
   { label: "The Land Adventure Playground", to: "/services/the-land", icon: TreeIcon },
   { label: "Kettle Club", to: "/services/kettle-club", icon: CoffeeIcon },
   { label: "Homegrown", to: "/services/homegrown", icon: PlantIcon },
